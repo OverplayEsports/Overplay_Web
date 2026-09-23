@@ -58,10 +58,19 @@ export function FinalCTA() {
               </p>
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent("open-tournament-registration"));
+                  onClick={(e) => {
+                    if (
+                      !cta.buttonUrl ||
+                      cta.buttonUrl === "#inscripcion" ||
+                      cta.buttonUrl === "#eventos" ||
+                      cta.buttonUrl.includes("inscripcion") ||
+                      cta.buttonText.toLowerCase().includes("inscrib")
+                    ) {
+                      e.preventDefault();
+                      window.dispatchEvent(new CustomEvent("open-tournament-registration"));
+                    }
                   }}
-                  href={cta.buttonUrl || "#inscripcion"}
+                  href="#inscripcion"
                   ariaLabel={cta.buttonText}
                   className="px-9 py-4 text-base"
                 >
@@ -69,6 +78,7 @@ export function FinalCTA() {
                   {cta.buttonText}
                 </Button>
               </div>
+
 
             </div>
           </div>
