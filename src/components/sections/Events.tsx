@@ -129,7 +129,13 @@ export function Events({ showRules = true }: EventsProps) {
                 </p>
 
                 <div className="mt-9 flex flex-col gap-4 sm:flex-row">
-                  <Button href="#inscripcion" ariaLabel="Inscribirse en Overplay Tourney 4">
+                  <Button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent("open-tournament-registration"));
+                    }}
+                    href="#inscripcion"
+                    ariaLabel="Inscribirse en Overplay Tourney 4"
+                  >
                     <UserPlus className="h-4 w-4" />
                     Inscribirse
                   </Button>
@@ -142,6 +148,7 @@ export function Events({ showRules = true }: EventsProps) {
                     Ver reglas
                   </Button>
                 </div>
+
               </div>
 
               {/* Columna visual */}

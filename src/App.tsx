@@ -11,6 +11,8 @@ import { NewsDetailPage } from "./pages/NewsDetailPage";
 import { RulesPage } from "./pages/RulesPage";
 import { AlliesPage } from "./pages/AlliesPage";
 
+import { TournamentRegistrationModal } from "./components/tournament/TournamentRegistrationModal";
+
 export type RouteId = "inicio" | "nosotros" | "eventos" | "reglas" | "competitivo" | "noticias" | "aliados" | "noticia-detalle";
 
 export interface RouteState {
@@ -46,17 +48,33 @@ function parseHash(hash: string): RouteState {
  */
 export default function App() {
   const [routeState, setRouteState] = useState<RouteState>(() => parseHash(window.location.hash));
+  const [isRegistrationOpen, setIsRegistrationOpen] = useState(() => {
+    return window.location.hash.toLowerCase().includes("inscripcion");
+  });
 
   useEffect(() => {
     const handleHashChange = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes("inscripcion")) {
+        setIsRegistrationOpen(true);
+      }
       const newRoute = parseHash(window.location.hash);
       setRouteState(newRoute);
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    const handleOpenRegistrationEvent = () => {
+      setIsRegistrationOpen(true);
+    };
+
     window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
+    window.addEventListener("open-tournament-registration", handleOpenRegistrationEvent);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("open-tournament-registration", handleOpenRegistrationEvent);
+    };
   }, []);
+
 
   const renderView = () => {
     switch (routeState.id) {
@@ -110,6 +128,19 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* Modal de Inscripción al Torneo */}
+      <TournamentRegistrationModal
+        isOpen={isRegistrationOpen}
+        onClose={() => {
+          setIsRegistrationOpen(false);
+          // Si el hash era #inscripcion, limpiamos suavemente el hash
+          if (window.location.hash.toLowerCase().includes("inscripcion")) {
+            window.history.replaceState(null, "", window.location.pathname + window.location.search);
+          }
+        }}
+      />
     </div>
   );
 }
+

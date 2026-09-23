@@ -57,11 +57,19 @@ export function FinalCTA() {
                 {cta.description}
               </p>
               <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Button href={cta.buttonUrl || "#eventos"} ariaLabel={cta.buttonText} className="px-9 py-4 text-base">
+                <Button
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("open-tournament-registration"));
+                  }}
+                  href={cta.buttonUrl || "#inscripcion"}
+                  ariaLabel={cta.buttonText}
+                  className="px-9 py-4 text-base"
+                >
                   <Swords className="h-4.5 w-4.5" />
                   {cta.buttonText}
                 </Button>
               </div>
+
             </div>
           </div>
         </Reveal>
