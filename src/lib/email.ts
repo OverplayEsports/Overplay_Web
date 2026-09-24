@@ -2,11 +2,15 @@ import emailjs from "@emailjs/browser";
 import { TournamentRegistrationData, OVERWATCH_RANKS } from "../types/tournament";
 
 const EMAILJS_SERVICE_ID =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_SERVICE_ID) || "";
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_SERVICE_ID) ||
+  "service_znoqqvd";
 const EMAILJS_TEMPLATE_ID =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_TEMPLATE_ID) || "";
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_TEMPLATE_ID) ||
+  "template_daxagwg";
 const EMAILJS_PUBLIC_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_PUBLIC_KEY) || "";
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_PUBLIC_KEY) ||
+  "A_wWfH6QloFlHuCgN";
+
 
 export const STAFF_NOTIFICATION_EMAIL = "overplaypage@gmail.com";
 
