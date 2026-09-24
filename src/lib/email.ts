@@ -1,7 +1,12 @@
+import emailjs from "@emailjs/browser";
 import { TournamentRegistrationData, OVERWATCH_RANKS } from "../types/tournament";
 
-const RESEND_API_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_RESEND_API_KEY) || "";
+const EMAILJS_SERVICE_ID =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_SERVICE_ID) || "";
+const EMAILJS_TEMPLATE_ID =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_TEMPLATE_ID) || "";
+const EMAILJS_PUBLIC_KEY =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_EMAILJS_PUBLIC_KEY) || "";
 
 export const STAFF_NOTIFICATION_EMAIL = "overplaypage@gmail.com";
 
@@ -14,7 +19,7 @@ function getRankImgUrl(rankName: string): string {
 }
 
 /**
- * Genera el cuerpo HTML con diseño oficial de Overplay Esports
+ * Genera el cuerpo HTML con diseño oficial de Overplay Esports para usar en EmailJS
  */
 export function generateRegistrationEmailHtml(data: TournamentRegistrationData, isStaffCopy: boolean = false): string {
   const tankImg = getRankImgUrl(data.rankTank);
@@ -180,59 +185,50 @@ export function generateRegistrationEmailHtml(data: TournamentRegistrationData, 
 }
 
 /**
- * Envía la confirmación por correo al jugador y la copia al Staff de Overplay
+ * Envía la confirmación por correo al jugador y la copia al Staff de Overplay mediante EmailJS
  */
 export async function sendTournamentConfirmationEmail(
   data: TournamentRegistrationData
 ): Promise<{ success: boolean; error?: string }> {
-  // If Resend API key is not configured, we gracefully warn without failing the form
-  const apiKey = RESEND_API_KEY.trim();
-  if (!apiKey) {
+  const serviceId = EMAILJS_SERVICE_ID.trim();
+  const templateId = EMAILJS_TEMPLATE_ID.trim();
+  const publicKey = EMAILJS_PUBLIC_KEY.trim();
+
+  // Si EmailJS no está configurado aún, permitimos que el formulario continúe
+  if (!serviceId || !templateId || !publicKey) {
     console.warn(
-      "Resend API Key no configurada (VITE_RESEND_API_KEY). El registro se guardó en Supabase."
+      "EmailJS no configurado (VITE_EMAILJS_SERVICE_ID / VITE_EMAILJS_TEMPLATE_ID / VITE_EMAILJS_PUBLIC_KEY). La inscripción se guardó en Supabase."
     );
     return { success: true };
   }
 
   try {
-    const playerHtml = generateRegistrationEmailHtml(data, false);
-    const staffHtml = generateRegistrationEmailHtml(data, true);
+    const templateParams = {
+      to_email: data.email.trim(),
+      staff_email: STAFF_NOTIFICATION_EMAIL,
+      draft_name: data.draftName,
+      battlenet_id: data.battleNetId,
+      discord_id: data.discordId,
+      email: data.email.trim(),
+      preferred_role: data.preferredRole,
+      rank_tank: data.rankTank,
+      rank_dps: data.rankDps,
+      rank_support: data.rankSupport,
+      favorite_hero: data.favoriteHero,
+      is_captain: data.isCaptain ? "SÍ (Postulante a Capitán)" : "NO (Jugador en Draft)",
+      tournament_name: data.tournamentName,
+      submitted_at: new Date().toLocaleString("es-ES"),
+      html_content: generateRegistrationEmailHtml(data, false),
+    };
 
-    // 1. Enviar comprobante al jugador
-    if (data.email && data.email.includes("@")) {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          from: "Overplay Esports <onboarding@resend.dev>",
-          to: [data.email.trim()],
-          subject: `🎮 Comprobante de Inscripción: ${data.tournamentName} (${data.draftName})`,
-          html: playerHtml,
-        }),
-      });
-    }
-
-    // 2. Enviar copia de respaldo al Staff (overplaypage@gmail.com)
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        from: "Overplay Esports <onboarding@resend.dev>",
-        to: [STAFF_NOTIFICATION_EMAIL],
-        subject: `⚡ Nueva Inscripción: ${data.draftName} [${data.preferredRole}] - ${data.tournamentName}`,
-        html: staffHtml,
-      }),
-    });
+    // Envío oficial vía SDK de EmailJS
+    await emailjs.send(serviceId, templateId, templateParams, publicKey);
+    console.log("Correo enviado exitosamente a través de EmailJS / Gmail.");
 
     return { success: true };
   } catch (err: any) {
-    console.error("Error al enviar correos mediante Resend:", err);
-    return { success: false, error: err.message };
+    console.error("Error al enviar correo con EmailJS:", err);
+    return { success: false, error: err.text || err.message };
   }
 }
+
