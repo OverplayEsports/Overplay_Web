@@ -17,9 +17,11 @@ import {
   Sparkles,
   HelpCircle,
   Image as ImageIcon,
+  Mail,
 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { uploadMultipleFilesToR2 } from "../../lib/r2";
+import { sendTournamentConfirmationEmail } from "../../lib/email";
 import {
   TournamentRole,
   CompetitiveRank,
@@ -43,6 +45,7 @@ export function TournamentRegistrationModal({
   const [isCaptain, setIsCaptain] = useState<boolean>(false);
   const [battleNetId, setBattleNetId] = useState("");
   const [discordId, setDiscordId] = useState("");
+  const [email, setEmail] = useState("");
   const [preferredRole, setPreferredRole] = useState<TournamentRole>("Tanque");
   const [rankTank, setRankTank] = useState<CompetitiveRank>("Platino");
   const [rankDps, setRankDps] = useState<CompetitiveRank>("Platino");
@@ -65,6 +68,7 @@ export function TournamentRegistrationModal({
     battleNetId: string;
     discordId: string;
     draftName: string;
+    email: string;
   } | null>(null);
 
   // File handling
@@ -128,6 +132,10 @@ export function TournamentRegistrationModal({
       setErrorMessage("Por favor ingresa tu usuario o ID de Discord.");
       return;
     }
+    if (!email.trim() || !email.includes("@")) {
+      setErrorMessage("Por favor ingresa un correo electrónico válido para enviarte el comprobante de inscripción.");
+      return;
+    }
     if (!draftName.trim()) {
       setErrorMessage("Por favor dinos cómo quieres que se te vea en el Draft (Tu nombre/apodo).");
       return;
@@ -162,6 +170,7 @@ export function TournamentRegistrationModal({
         is_captain: isCaptain,
         battlenet_id: battleNetId.trim(),
         discord_id: discordId.trim(),
+        email: email.trim().toLowerCase(),
         preferred_role: preferredRole,
         rank_tank: rankTank,
         rank_dps: rankDps,
@@ -187,11 +196,36 @@ export function TournamentRegistrationModal({
         );
       }
 
+      // 3. Enviar confirmación por correo al jugador y respaldo al staff (overplaypage@gmail.com)
+      setUploadProgressText("Enviando comprobante por correo electrónico...");
+      try {
+        await sendTournamentConfirmationEmail({
+          id: data?.id,
+          tournamentId,
+          tournamentName,
+          email: email.trim().toLowerCase(),
+          isCaptain,
+          battleNetId: battleNetId.trim(),
+          discordId: discordId.trim(),
+          preferredRole,
+          rankTank,
+          rankDps,
+          rankSupport,
+          draftName: draftName.trim(),
+          favoriteHero: favoriteHero.trim(),
+          careerFileUrls: uploadedUrls,
+          status: "pending",
+        });
+      } catch (mailErr) {
+        console.warn("Aviso al enviar correos (la inscripción se guardó correctamente):", mailErr);
+      }
+
       setSubmittedData({
         id: data?.id,
         battleNetId: battleNetId.trim(),
         discordId: discordId.trim(),
         draftName: draftName.trim(),
+        email: email.trim().toLowerCase(),
       });
 
       setIsSuccess(true);
@@ -213,6 +247,7 @@ export function TournamentRegistrationModal({
     setFilePreviews([]);
     setBattleNetId("");
     setDiscordId("");
+    setEmail("");
     setDraftName("");
     setFavoriteHero("");
     onClose();
@@ -268,7 +303,7 @@ export function TournamentRegistrationModal({
               </h2>
 
               <p className="mx-auto mt-3 max-w-lg text-sm text-white/70 sm:text-base">
-                Tu solicitud ha sido guardada. Mantente atento a tus solicitudes de amistad en Battle.net y Discord para la confirmación oficial.
+                Tu solicitud ha sido guardada con éxito. Hemos enviado una copia de respaldo a tu correo electrónico registrado y a nuestro equipo de moderación.
               </p>
 
               {submittedData && (
@@ -281,9 +316,13 @@ export function TournamentRegistrationModal({
                     <span className="text-white/50">Battle.net ID:</span>
                     <span className="font-mono text-white/90">{submittedData.battleNetId}</span>
                   </div>
-                  <div className="flex justify-between pt-2">
+                  <div className="flex justify-between border-b border-white/5 py-2">
                     <span className="text-white/50">Discord:</span>
                     <span className="font-mono text-indigo-300">{submittedData.discordId}</span>
+                  </div>
+                  <div className="flex justify-between pt-2">
+                    <span className="text-white/50">Correo de Respaldo:</span>
+                    <span className="font-mono text-emerald-300">{submittedData.email}</span>
                   </div>
                 </div>
               )}
@@ -313,7 +352,7 @@ export function TournamentRegistrationModal({
                   Formulario de Registro al Torneo
                 </h2>
                 <p className="mt-1.5 text-xs sm:text-sm text-white/60">
-                  Rellena los siguientes campos con la información de tu cuenta. Nuestro equipo revisará tu perfil de carrera para armar las llaves del torneo.
+                  Rellena los siguientes campos con la información de tu cuenta. Te enviaremos un comprobante automático a tu correo electrónico.
                 </p>
               </div>
 
@@ -414,7 +453,31 @@ export function TournamentRegistrationModal({
                   </div>
                 </div>
 
-                {/* 4. ¿QUÉ ROL VAS A JUGAR? */}
+                {/* 4. CORREO ELECTRÓNICO (RESPALDO / COMPROBANTE) */}
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4.5 sm:p-5">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-orange-400" />
+                    <label className="text-xs font-bold uppercase tracking-wider text-white/90 sm:text-sm">
+                      Correo Electrónico de Contacto <span className="text-orange-400">*</span>
+                    </label>
+                  </div>
+                  <p className="mt-1 text-xs text-white/60">
+                    Te enviaremos automáticamente una copia y comprobante con todos los datos que registres en este formulario.
+                  </p>
+
+                  <div className="mt-3 relative">
+                    <input
+                      type="email"
+                      required
+                      placeholder="ejemplo@correo.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full rounded-xl border border-white/15 bg-black/40 px-4 py-3 font-mono text-sm text-white placeholder-white/25 transition-all focus:border-orange-500 focus:bg-black/60 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    />
+                  </div>
+                </div>
+
+                {/* 5. ¿QUÉ ROL VAS A JUGAR? */}
                 <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4.5 sm:p-5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-white/90 sm:text-sm">
                     ¿Qué rol vas a jugar? <span className="text-orange-400">*</span>
