@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   BadgeCheck,
   CalendarDays,
@@ -11,57 +12,49 @@ import {
   Scale,
   Shield,
   BookOpen,
+  type LucideIcon,
 } from "lucide-react";
 import { SectionHeading } from "../ui/SectionHeading";
 import { Button } from "../ui/Button";
 import { Reveal, Stagger, StaggerItem } from "../ui/Reveal";
 import { TOURNAMENT_RULES } from "../../data/rules";
+import { DEFAULT_EVENT_DATA, fetchEventData, type EventData } from "../../data/events";
 import { cn } from "../../utils/cn";
 
-const TOURNEY_INFO = [
-  { icon: Radio, label: "Estado", value: "Inscripciones abiertas" },
-  { icon: CalendarDays, label: "Fecha", value: "21 – 22 Mar 2026" },
-  { icon: Clock, label: "Horario", value: "18:00 CEST" },
-  { icon: Swords, label: "Formato", value: "5v5 · Doble eliminación" },
-  { icon: UserPlus, label: "Inscripción", value: "Por equipos · Gratuita" },
-  { icon: Trophy, label: "Premios", value: "Prize pool + medallero" },
-];
-
-const PROCESS = [
-  {
-    step: "01",
-    icon: FilePenLine,
-    title: "Inscripción",
-    text: "Registra a tu equipo de cinco a través del Discord oficial antes del cierre de plazas.",
-  },
-  {
-    step: "02",
-    icon: BadgeCheck,
-    title: "Confirmación",
-    text: "El staff verifica el roster, confirma la plaza y asigna a tu equipo su llave del bracket.",
-  },
-  {
-    step: "03",
-    icon: Swords,
-    title: "Competencia",
-    text: "Enfrentamientos 5v5 con formato de doble eliminación, casters en vivo y arbitraje oficial.",
-  },
-  {
-    step: "04",
-    icon: Medal,
-    title: "Resultados",
-    text: "Clasificación final, medallero oficial y reconocimientos publicados para toda la comunidad.",
-  },
-];
-
-const CHIPS = ["5v5", "Doble eliminación", "Marzo 2026"];
+const ICON_MAP: Record<string, LucideIcon> = {
+  Radio,
+  CalendarDays,
+  Clock,
+  Swords,
+  UserPlus,
+  Trophy,
+  FilePenLine,
+  BadgeCheck,
+  Medal,
+  Shield,
+  Scale,
+  BookOpen,
+};
 
 interface EventsProps {
   showRules?: boolean;
 }
 
-/** II. EVENTOS — pieza central: Overplay Tourney 4 & Reglamento Oficial. */
+/** II. EVENTOS — pieza central: Overplay Tourney 4 & Reglamento Oficial sincronizado con Supabase. */
 export function Events({ showRules = true }: EventsProps) {
+  const [eventData, setEventData] = useState<EventData>(DEFAULT_EVENT_DATA);
+
+  useEffect(() => {
+    let alive = true;
+    fetchEventData().then((data) => {
+      if (!alive) return;
+      if (data) setEventData(data);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   return (
     <section id="eventos" aria-label="Eventos" className="relative scroll-mt-24 overflow-hidden py-24 sm:py-32">
       {/* Ambiente */}
@@ -69,7 +62,7 @@ export function Events({ showRules = true }: EventsProps) {
         <div className="absolute right-[-14rem] top-16 h-[30rem] w-[30rem] rounded-full bg-orange-600/10 blur-[140px]" />
         <div className="absolute bottom-[-10rem] left-[-10rem] h-[26rem] w-[26rem] rounded-full bg-violet-600/10 blur-[140px]" />
         <span className="absolute -right-8 top-2 select-none font-display text-[16rem] font-bold italic leading-none text-white/[0.025] sm:text-[22rem]">
-          04
+          {eventData.edition || "04"}
         </span>
       </div>
 
@@ -87,7 +80,7 @@ export function Events({ showRules = true }: EventsProps) {
         {/* Panel destacado: Overplay Tourney 4 */}
         <Reveal className="mt-14" y={40}>
           <article
-            aria-label="Overplay Tourney 4"
+            aria-label={`${eventData.titlePrefix} ${eventData.titleMain} ${eventData.edition}`}
             className={cn(
               "card-surface relative overflow-hidden rounded-[2rem]",
               "shadow-[0_40px_120px_-40px_rgba(249,115,22,0.25)]"
@@ -108,24 +101,22 @@ export function Events({ showRules = true }: EventsProps) {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400" />
                   </span>
                   <span className="font-display text-[11px] font-bold uppercase tracking-[0.24em] text-orange-200">
-                    Inscripciones abiertas
+                    {eventData.statusBadge}
                   </span>
                 </span>
 
                 <h3 className="mt-7 font-display font-bold uppercase italic leading-[0.9] tracking-tight">
-                  <span className="block text-3xl text-white/85 sm:text-4xl">Overplay</span>
+                  <span className="block text-3xl text-white/85 sm:text-4xl">{eventData.titlePrefix}</span>
                   <span className="block text-6xl text-white sm:text-7xl lg:text-8xl">
-                    Tourney{" "}
+                    {eventData.titleMain}{" "}
                     <span className="text-brand-gradient drop-shadow-[0_0_35px_rgba(249,115,22,0.4)]">
-                      4
+                      {eventData.edition}
                     </span>
                   </span>
                 </h3>
 
                 <p className="mt-6 max-w-md text-base leading-relaxed text-white/55 sm:text-lg">
-                  La cuarta edición del torneo insignia reúne a los mejores equipos de la comunidad
-                  en un bracket 5v5 de doble eliminación. Compite, demuestra y escribe tu nombre en
-                  la historia de Overplay.
+                  {eventData.description}
                 </p>
 
                 <div className="mt-9 flex flex-col gap-4 sm:flex-row">
@@ -133,19 +124,19 @@ export function Events({ showRules = true }: EventsProps) {
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent("open-tournament-registration"));
                     }}
-                    href="#inscripcion"
-                    ariaLabel="Inscribirse en Overplay Tourney 4"
+                    href={eventData.registerButtonUrl || "#inscripcion"}
+                    ariaLabel={eventData.registerButtonText || "Inscribirse"}
                   >
                     <UserPlus className="h-4 w-4" />
-                    Inscribirse
+                    {eventData.registerButtonText || "Inscribirse"}
                   </Button>
                   <Button
-                    href="#/reglas"
+                    href={eventData.rulesButtonUrl || "#/reglas"}
                     variant="ghost"
-                    ariaLabel="Ver reglas del torneo"
+                    ariaLabel={eventData.rulesButtonText || "Ver reglas"}
                   >
                     <FilePenLine className="h-4 w-4" />
-                    Ver reglas
+                    {eventData.rulesButtonText || "Ver reglas"}
                   </Button>
                 </div>
 
@@ -154,8 +145,8 @@ export function Events({ showRules = true }: EventsProps) {
               {/* Columna visual */}
               <div className="relative min-h-[260px] overflow-hidden sm:min-h-[320px] lg:min-h-full">
                 <img
-                  src="/images/tourney-banner.jpg"
-                  alt="Arte oficial del torneo Overplay Tourney 4"
+                  src={eventData.bannerImage || "/images/tourney-banner.jpg"}
+                  alt={`${eventData.titlePrefix} ${eventData.titleMain} ${eventData.edition}`}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-[2.5s] ease-out hover:scale-[1.04]"
                   loading="lazy"
                   decoding="async"
@@ -163,82 +154,94 @@ export function Events({ showRules = true }: EventsProps) {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-transparent lg:bg-gradient-to-r lg:from-[#0b0b0d] lg:via-[#0b0b0d]/30 lg:to-transparent" />
 
                 {/* Chips flotantes */}
-                <div className="absolute bottom-5 left-5 right-5 flex flex-wrap gap-2.5 sm:bottom-7 sm:left-7">
-                  {CHIPS.map((chip, i) => (
-                    <span
-                      key={chip}
-                      className={cn(
-                        "glass rounded-lg px-3.5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-white/85",
-                        "shadow-[0_8px_24px_-8px_rgba(0,0,0,0.7)]",
-                        i === 1 && "motion-safe:animate-glow-pulse"
-                      )}
-                    >
-                      {chip}
-                    </span>
-                  ))}
-                </div>
+                {eventData.chips && eventData.chips.length > 0 && (
+                  <div className="absolute bottom-5 left-5 right-5 flex flex-wrap gap-2.5 sm:bottom-7 sm:left-7">
+                    {eventData.chips.map((chip, i) => (
+                      <span
+                        key={chip}
+                        className={cn(
+                          "glass rounded-lg px-3.5 py-2 font-display text-[11px] font-bold uppercase tracking-[0.2em] text-white/85",
+                          "shadow-[0_8px_24px_-8px_rgba(0,0,0,0.7)]",
+                          i === 1 && "motion-safe:animate-glow-pulse"
+                        )}
+                      >
+                        {chip}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Ficha técnica */}
-            <dl className="relative grid grid-cols-2 gap-px border-t border-white/[0.08] bg-white/[0.06] md:grid-cols-3 xl:grid-cols-6">
-              {TOURNEY_INFO.map((item) => (
-                <div
-                  key={item.label}
-                  className="group/info flex flex-col gap-2 bg-[#0b0b0d] p-5 transition-colors duration-300 hover:bg-[#101014] sm:p-6"
-                >
-                  <dt className="flex items-center gap-2 font-display text-[10px] font-semibold uppercase tracking-[0.26em] text-white/40">
-                    <item.icon className="h-3.5 w-3.5 text-orange-400/80 transition-transform duration-300 group-hover/info:scale-110" />
-                    {item.label}
-                  </dt>
-                  <dd className="text-sm font-semibold text-white/90 sm:text-[15px]">{item.value}</dd>
-                </div>
-              ))}
-            </dl>
+            {eventData.infoItems && eventData.infoItems.length > 0 && (
+              <dl className="relative grid grid-cols-2 gap-px border-t border-white/[0.08] bg-white/[0.06] md:grid-cols-3 xl:grid-cols-6">
+                {eventData.infoItems.map((item) => {
+                  const ItemIcon = ICON_MAP[item.icon] || Trophy;
+                  return (
+                    <div
+                      key={item.label}
+                      className="group/info flex flex-col gap-2 bg-[#0b0b0d] p-5 transition-colors duration-300 hover:bg-[#101014] sm:p-6"
+                    >
+                      <dt className="flex items-center gap-2 font-display text-[10px] font-semibold uppercase tracking-[0.26em] text-white/40">
+                        <ItemIcon className="h-3.5 w-3.5 text-orange-400/80 transition-transform duration-300 group-hover/info:scale-110" />
+                        {item.label}
+                      </dt>
+                      <dd className="text-sm font-semibold text-white/90 sm:text-[15px]">{item.value}</dd>
+                    </div>
+                  );
+                })}
+              </dl>
+            )}
           </article>
         </Reveal>
 
         {/* Proceso competitivo */}
-        <div className="relative mt-16 sm:mt-20">
-          <Reveal className="mb-9 flex items-center gap-4">
-            <span className="font-display text-xs font-semibold uppercase tracking-[0.35em] text-white/40">
-              Así funciona el torneo
-            </span>
-            <span aria-hidden className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
-          </Reveal>
+        {eventData.processPhases && eventData.processPhases.length > 0 && (
+          <div className="relative mt-16 sm:mt-20">
+            <Reveal className="mb-9 flex items-center gap-4">
+              <span className="font-display text-xs font-semibold uppercase tracking-[0.35em] text-white/40">
+                Así funciona el torneo
+              </span>
+              <span aria-hidden className="h-px flex-1 bg-gradient-to-r from-white/15 to-transparent" />
+            </Reveal>
 
-          <div className="relative">
-            {/* Línea conectora — desktop */}
-            <span
-              aria-hidden
-              className="absolute left-0 right-0 top-9 hidden h-px bg-gradient-to-r from-orange-500/50 via-white/10 to-violet-500/50 md:block"
-            />
-            <Stagger gap={0.12} className="grid gap-5 sm:grid-cols-2 md:grid-cols-4">
-              {PROCESS.map((phase) => (
-                <StaggerItem key={phase.step}>
-                  <article className="card-surface group relative h-full overflow-hidden rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1.5 hover:border-orange-400/30 hover:shadow-[0_20px_50px_-20px_rgba(249,115,22,0.35)]">
-                    <span
-                      aria-hidden
-                      className="absolute -right-3 -top-6 select-none font-display text-7xl font-bold italic text-white/[0.045] transition-colors duration-500 group-hover:text-orange-500/10"
-                    >
-                      {phase.step}
-                    </span>
-                    <span className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-orange-400/25 bg-orange-500/10 text-orange-300 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-[-6deg]">
-                      <phase.icon className="h-5 w-5" />
-                    </span>
-                    <p className="mt-5 font-display text-[10px] font-semibold uppercase tracking-[0.3em] text-orange-300/80">
-                      Fase {phase.step}
-                    </p>
-                    <h4 className="mt-1.5 font-display text-xl font-bold uppercase italic text-white">
-                      {phase.title}
-                    </h4>
-                    <p className="mt-2.5 text-sm leading-relaxed text-white/50">{phase.text}</p>
-                  </article>
-                </StaggerItem>
-              ))}
-            </Stagger>
+            <div className="relative">
+              {/* Línea conectora — desktop */}
+              <span
+                aria-hidden
+                className="absolute left-0 right-0 top-9 hidden h-px bg-gradient-to-r from-orange-500/50 via-white/10 to-violet-500/50 md:block"
+              />
+              <Stagger gap={0.12} className="grid gap-5 sm:grid-cols-2 md:grid-cols-4">
+                {eventData.processPhases.map((phase) => {
+                  const PhaseIcon = ICON_MAP[phase.icon] || Swords;
+                  return (
+                    <StaggerItem key={phase.step}>
+                      <article className="card-surface group relative h-full overflow-hidden rounded-2xl p-6 transition-all duration-500 hover:-translate-y-1.5 hover:border-orange-400/30 hover:shadow-[0_20px_50px_-20px_rgba(249,115,22,0.35)]">
+                        <span
+                          aria-hidden
+                          className="absolute -right-3 -top-6 select-none font-display text-7xl font-bold italic text-white/[0.045] transition-colors duration-500 group-hover:text-orange-500/10"
+                        >
+                          {phase.step}
+                        </span>
+                        <span className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-orange-400/25 bg-orange-500/10 text-orange-300 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-[-6deg]">
+                          <PhaseIcon className="h-5 w-5" />
+                        </span>
+                        <p className="mt-5 font-display text-[10px] font-semibold uppercase tracking-[0.3em] text-orange-300/80">
+                          Fase {phase.step}
+                        </p>
+                        <h4 className="mt-1.5 font-display text-xl font-bold uppercase italic text-white">
+                          {phase.title}
+                        </h4>
+                        <p className="mt-2.5 text-sm leading-relaxed text-white/50">{phase.text}</p>
+                      </article>
+                    </StaggerItem>
+                  );
+                })}
+              </Stagger>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Apartado de Reglas del Torneo (Solo visible en la sección/vista de eventos) */}
         {showRules && (

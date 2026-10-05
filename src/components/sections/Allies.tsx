@@ -7,7 +7,12 @@ import { SocialButton } from "../ui/SocialIcons";
 import { Reveal, Stagger, StaggerItem } from "../ui/Reveal";
 
 function AllyCard({ ally }: { ally: Ally }) {
-  const isImageAvatar = ally.avatarType === "image" && Boolean(ally.avatarImage?.trim());
+  const [imgError, setImgError] = useState(false);
+  const isImageAvatar =
+    !imgError &&
+    ally.avatarType === "image" &&
+    typeof ally.avatarImage === "string" &&
+    ally.avatarImage.trim().length > 0;
 
   return (
     <article className="group relative flex h-full flex-col items-center gap-4 overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] p-7 text-center backdrop-blur-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-violet-400/30 hover:bg-white/[0.05] hover:shadow-[0_24px_60px_-26px_rgba(139,92,246,0.5)]">
@@ -25,15 +30,16 @@ function AllyCard({ ally }: { ally: Ally }) {
           <div className="relative h-16 w-16 overflow-hidden rounded-full ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-violet-400/60 transition-transform duration-500 group-hover:scale-105">
             <img
               src={ally.avatarImage}
-              alt={ally.name}
+              alt={ally.name || "Aliado"}
+              onError={() => setImgError(true)}
               className="h-full w-full rounded-full object-cover"
               loading="lazy"
             />
           </div>
         ) : (
           <MonogramAvatar
-            name={ally.name}
-            gradient={ally.gradient}
+            name={ally.name || "OP"}
+            gradient={ally.gradient || "from-violet-500 to-fuchsia-600"}
             size="lg"
             rounded="full"
             className="relative transition-transform duration-500 group-hover:scale-105"

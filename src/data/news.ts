@@ -12,6 +12,8 @@
  * - Categoría, Autor, Fecha y Tiempo de lectura calculado
  */
 
+import { supabase } from "../lib/supabase";
+
 export type NewsCategory = "overwatch" | "fortnite" | "valorant" | "marvel-rivals";
 
 export interface NewsItem {
@@ -61,7 +63,7 @@ export const CATEGORY_STYLES: Record<
 
 /**
  * URL base de la instalación de WordPress.
- * Puede sobreescribirse mediante la variable de entorno VITE_WORDPRESS_URL o localStorage.
+ * Puede sobreescribirse mediante Supabase, variable de entorno o localStorage.
  */
 export const DEFAULT_WORDPRESS_URL =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_WORDPRESS_URL) ||
@@ -423,12 +425,50 @@ export function getWordPressEndpoints(inputUrl: string): string[] {
 }
 
 /**
- * Obtiene las noticias directamente desde WordPress.
- * Si WordPress no está configurado o falla la conexión, devuelve los datos de reserva (FALLBACK_NEWS_ITEMS).
+ * Obtiene las noticias directamente desde Supabase o WordPress.
+ * Si Supabase tiene artículos personalizados, los utiliza.
+ * Si hay una URL de WordPress configurada, consulta la API REST.
+ * Si falla la conexión o no hay datos, devuelve los datos de reserva (FALLBACK_NEWS_ITEMS).
  */
 export async function fetchNews(customWpUrl?: string): Promise<NewsItem[]> {
+  let wpUrlFromSupabase: string | undefined = undefined;
+
+  try {
+    const { data: newsConfig, error: newsErr } = await supabase
+      .from("team_groups")
+      .select("description")
+      .eq("id", "config_news")
+      .maybeSingle();
+
+    if (!newsErr && newsConfig?.description) {
+      const parsed = typeof newsConfig.description === "string" ? JSON.parse(newsConfig.description) : newsConfig.description;
+      if (parsed && Array.isArray(parsed.news) && parsed.news.length > 0) {
+        return parsed.news.map((item: any) => ({
+          id: item.id || `news-${Date.now()}`,
+          category: item.category || "overwatch",
+          title: item.title || "Noticia Overplay",
+          subtitle: item.subtitle || "",
+          excerpt: item.excerpt || "",
+          author: item.author || "Staff Overplay",
+          date: item.date || "2026",
+          image: item.image || "/images/tourney-banner.jpg",
+          readTime: item.readTime || "3 min",
+          content: item.content || "",
+          attachedImages: Array.isArray(item.attachedImages) ? item.attachedImages : [],
+          isHtml: Boolean(item.isHtml),
+        }));
+      }
+      if (parsed && typeof parsed.wordpressUrl === "string" && parsed.wordpressUrl.trim()) {
+        wpUrlFromSupabase = parsed.wordpressUrl.trim();
+      }
+    }
+  } catch (supabaseErr) {
+    console.warn("[Overplay News] Fallo al consultar Supabase para noticias:", supabaseErr);
+  }
+
   const wpBaseUrl = (
     customWpUrl ||
+    wpUrlFromSupabase ||
     DEFAULT_WORDPRESS_URL ||
     (typeof window !== "undefined" && localStorage.getItem("overplay_wordpress_url")) ||
     ""
