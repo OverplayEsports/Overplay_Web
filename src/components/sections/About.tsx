@@ -41,8 +41,13 @@ const ACCENTS = {
 const SOCIAL_ORDER = ["x", "twitch", "instagram", "youtube", "discord"] as const;
 
 function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; accent: TeamGroup["accent"] }) {
+  const [imgError, setImgError] = useState(false);
   const styles = ACCENTS[accent] || ACCENTS.ember;
-  const isImageAvatar = member.avatarType === "image" && Boolean(member.avatarImage?.trim());
+  const isImageAvatar =
+    !imgError &&
+    member.avatarType === "image" &&
+    typeof member.avatarImage === "string" &&
+    member.avatarImage.trim().length > 0;
 
   return (
     <article
@@ -70,20 +75,21 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
           <div className="relative h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-full ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-orange-400/60 transition-all">
             <img
               src={member.avatarImage}
-              alt={member.name}
+              alt={member.name || "Miembro"}
+              onError={() => setImgError(true)}
               className="h-full w-full rounded-full object-cover"
               loading="lazy"
             />
           </div>
         ) : (
-          <MonogramAvatar name={member.name} gradient={member.gradient} size="lg" />
+          <MonogramAvatar name={member.name || "OP"} gradient={member.gradient || "from-orange-500 to-rose-600"} size="lg" />
         )}
       </div>
       <div>
         <h4 className="font-display text-base font-bold uppercase italic tracking-wide text-white">
-          {member.name}
+          {member.name || "Miembro"}
         </h4>
-        <p className="mt-0.5 text-xs text-white/50">{member.role}</p>
+        <p className="mt-0.5 text-xs text-white/50">{member.role || "Staff"}</p>
       </div>
       {member.socials && (
         <div className="mt-auto flex w-full flex-nowrap items-center justify-center gap-1.5 border-t border-white/[0.07] pt-3.5">
@@ -95,7 +101,7 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
                 key={platform}
                 platform={platform}
                 href={href}
-                label={`${member.name} en ${platform}`}
+                label={`${member.name || "Miembro"} en ${platform}`}
                 className="h-6.5 w-6.5 sm:h-7 sm:w-7 shrink-0 rounded-full border-white/10 bg-white/[0.03] text-white/50 hover:border-orange-400/50 hover:bg-orange-500/10 hover:text-white"
                 iconClassName="h-3 w-3 sm:h-3.5 sm:w-3.5"
               />
@@ -115,7 +121,7 @@ export function About() {
     let alive = true;
     fetchTeamGroups().then((data) => {
       if (!alive) return;
-      if (data && data.length > 0) {
+      if (data && data.length > 0 && data.some((g) => g.members && g.members.length > 0)) {
         setGroups(data);
       }
     });

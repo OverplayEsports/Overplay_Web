@@ -69,6 +69,8 @@ interface SocialButtonProps {
 /** Botón circular de red social con hover de marca. */
 export function SocialButton({ platform, href, label, className, iconClassName }: SocialButtonProps) {
   const Icon = SOCIAL_ICONS[platform];
+  if (!Icon) return null;
+
   const names: Record<SocialPlatform, string> = {
     x: "X",
     twitch: "Twitch",
@@ -79,7 +81,7 @@ export function SocialButton({ platform, href, label, className, iconClassName }
   return (
     <a
       href={href}
-      aria-label={label ?? `Perfil en ${names[platform]}`}
+      aria-label={label ?? `Perfil en ${names[platform] || platform}`}
       className={cn(
         "group/soc flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/60",
         "transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-400/50 hover:bg-orange-500/10 hover:text-white",

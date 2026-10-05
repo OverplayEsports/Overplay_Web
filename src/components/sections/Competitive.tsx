@@ -8,7 +8,12 @@ import { Reveal, Stagger, StaggerItem } from "../ui/Reveal";
 import { cn } from "../../utils/cn";
 
 function PlayerCard({ player }: { player: Player }) {
-  const isImageAvatar = player.avatarType === "image" && Boolean(player.avatarImage?.trim());
+  const [imgError, setImgError] = useState(false);
+  const isImageAvatar =
+    !imgError &&
+    player.avatarType === "image" &&
+    typeof player.avatarImage === "string" &&
+    player.avatarImage.trim().length > 0;
 
   return (
     <article className="card-surface group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl p-5 sm:p-6 transition-all duration-500 will-change-transform hover:-translate-y-2 hover:border-orange-400/30 hover:shadow-[0_24px_60px_-24px_rgba(249,115,22,0.4)]">
@@ -31,13 +36,14 @@ function PlayerCard({ player }: { player: Player }) {
             <div className="relative h-20 w-20 sm:h-24 sm:w-24 overflow-hidden rounded-2xl ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-orange-400/60 transition-all">
               <img
                 src={player.avatarImage}
-                alt={player.name}
+                alt={player.name || "Jugador"}
+                onError={() => setImgError(true)}
                 className="h-full w-full rounded-2xl object-cover"
                 loading="lazy"
               />
             </div>
           ) : (
-            <MonogramAvatar name={player.name} gradient={player.gradient} size="xl" />
+            <MonogramAvatar name={player.name || "UL"} gradient={player.gradient || "from-orange-500 to-rose-600"} size="xl" />
           )}
         </div>
 
@@ -45,20 +51,20 @@ function PlayerCard({ player }: { player: Player }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <h4 className="font-display text-2xl sm:text-3xl font-bold uppercase italic tracking-wide text-white truncate">
-              {player.name}
+              {player.name || "Jugador"}
             </h4>
             <span
               aria-hidden
               className="select-none font-display text-3xl sm:text-4xl font-bold italic leading-none text-white/[0.12] transition-colors duration-500 group-hover:text-orange-500/30"
             >
-              {player.tag}
+              {player.tag || "00"}
             </span>
           </div>
 
           <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm">
-            <span className="font-bold text-orange-300">{player.role}</span>
+            <span className="font-bold text-orange-300">{player.role || "Player"}</span>
             <span aria-hidden className="h-1 w-1 rounded-full bg-white/30" />
-            <span className="text-white/50">{player.position}</span>
+            <span className="text-white/50">{player.position || "Titular"}</span>
           </p>
 
           {/* Eventos disputados */}
@@ -88,7 +94,7 @@ function PlayerCard({ player }: { player: Player }) {
                   key={platform}
                   platform={platform}
                   href={href}
-                  label={`${player.name} en ${platform}`}
+                  label={`${player.name || "Jugador"} en ${platform}`}
                   className="h-8 w-8 rounded-full border-white/10 bg-white/[0.04] text-white/60 hover:border-orange-400/50 hover:bg-orange-500/15 hover:text-white"
                   iconClassName="h-3.5 w-3.5"
                 />

@@ -26,7 +26,8 @@ export function MonogramAvatar({
   className,
   rounded = "xl",
 }: MonogramAvatarProps) {
-  const initials = name.replace(/[^a-zA-Z]/g, "").slice(0, 2).toUpperCase() || name.slice(0, 2).toUpperCase();
+  const safeName = typeof name === "string" && name.trim().length > 0 ? name : "OP";
+  const initials = safeName.replace(/[^a-zA-Z0-9]/g, "").slice(0, 2).toUpperCase() || safeName.slice(0, 2).toUpperCase() || "OP";
   return (
     <div
       aria-hidden

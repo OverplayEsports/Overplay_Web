@@ -150,34 +150,43 @@ export async function fetchCompetitiveData(): Promise<{ roster: Player[]; events
       .single();
 
     if (!error && data?.description) {
-      const parsed = JSON.parse(data.description);
-      if (parsed && Array.isArray(parsed.roster)) {
-        const roster: Player[] = parsed.roster.map((p: any) => {
-          const socialsMap: Partial<Record<SocialPlatform, string>> = {};
-          if (p.socials && typeof p.socials === "object") {
-            Object.entries(p.socials).forEach(([key, val]: [string, any]) => {
-              if (val && typeof val === "object") {
-                if (val.enabled && val.url) {
-                  socialsMap[key as SocialPlatform] = val.url;
+      let parsed: any = null;
+      try {
+        parsed = typeof data.description === "string" ? JSON.parse(data.description) : data.description;
+      } catch (jsonErr) {
+        console.warn("[Overplay Competitive] Error parseando JSON de Supabase:", jsonErr);
+      }
+
+      if (parsed && typeof parsed === "object") {
+        let roster: Player[] = ROSTER;
+        if (Array.isArray(parsed.roster) && parsed.roster.length > 0) {
+          roster = parsed.roster.map((p: any, idx: number) => {
+            const socialsMap: Partial<Record<SocialPlatform, string>> = {};
+            if (p.socials && typeof p.socials === "object") {
+              Object.entries(p.socials).forEach(([key, val]: [string, any]) => {
+                if (val && typeof val === "object") {
+                  if (val.enabled && val.url) {
+                    socialsMap[key as SocialPlatform] = val.url;
+                  }
+                } else if (typeof val === "string" && val.trim()) {
+                  socialsMap[key as SocialPlatform] = val;
                 }
-              } else if (typeof val === "string" && val.trim()) {
-                socialsMap[key as SocialPlatform] = val;
-              }
-            });
-          }
-          return {
-            id: p.id,
-            tag: p.tag || "01",
-            name: p.name || "",
-            role: p.role || "Player",
-            position: p.position || "Titular",
-            events: Array.isArray(p.events) ? p.events : [],
-            avatarType: p.avatarType || (p.avatarImage ? "image" : "monogram"),
-            avatarImage: p.avatarImage || "",
-            socials: socialsMap,
-            gradient: p.gradient || "from-orange-500 to-rose-600",
-          };
-        });
+              });
+            }
+            return {
+              id: p.id || p.tag || p.name || String(idx + 1),
+              tag: p.tag || `0${idx + 1}`,
+              name: p.name || "Jugador",
+              role: p.role || "Player",
+              position: p.position || "Titular",
+              events: Array.isArray(p.events) ? p.events : [],
+              avatarType: (p.avatarType === "image" || p.avatarImage ? "image" : "monogram") as "monogram" | "image",
+              avatarImage: typeof p.avatarImage === "string" ? p.avatarImage : "",
+              socials: Object.keys(socialsMap).length > 0 ? socialsMap : { x: "#" },
+              gradient: p.gradient || "from-orange-500 to-rose-600",
+            };
+          });
+        }
 
         const events: TeamEvent[] = Array.isArray(parsed.events) && parsed.events.length > 0
           ? parsed.events

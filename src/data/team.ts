@@ -88,49 +88,59 @@ export async function fetchTeamGroups(): Promise<TeamGroup[]> {
       .select("*")
       .order("order_index", { ascending: true });
 
-    if (memberErr || !dbMembers) {
-      console.warn("[Overplay Team] Error al obtener miembros de Supabase:", memberErr);
+    if (memberErr || !dbMembers || dbMembers.length === 0) {
+      console.warn("[Overplay Team] Usando datos locales por ausencia de miembros en Supabase:", memberErr);
       return TEAM_GROUPS;
     }
 
     // Mapear miembros a cada grupo (excluyendo registros de configuración)
     const formattedGroups: TeamGroup[] = dbGroups
-      .filter((group: any) => !group.id?.startsWith("config_"))
+      .filter((group: any) => group && group.id && !String(group.id).startsWith("config_"))
       .map((group: any) => {
         const groupMembers = dbMembers
-          .filter((m: any) => m.group_id === group.id)
-        .map((m: any) => {
-          // Extraer urls activas de socials jsonb
-          const socialsMap: Partial<Record<SocialPlatform, string>> = {};
-          if (m.socials && typeof m.socials === "object") {
-            Object.entries(m.socials).forEach(([key, val]: [string, any]) => {
-              if (val && typeof val === "object" && val.enabled && val.url) {
-                socialsMap[key as SocialPlatform] = val.url;
-              } else if (typeof val === "string" && val.trim()) {
-                socialsMap[key as SocialPlatform] = val;
-              }
-            });
-          }
+          .filter((m: any) => m && m.group_id === group.id)
+          .map((m: any) => {
+            // Extraer urls activas de socials jsonb
+            const socialsMap: Partial<Record<SocialPlatform, string>> = {};
+            if (m.socials && typeof m.socials === "object") {
+              Object.entries(m.socials).forEach(([key, val]: [string, any]) => {
+                if (val && typeof val === "object" && val.enabled && val.url) {
+                  socialsMap[key as SocialPlatform] = val.url;
+                } else if (typeof val === "string" && val.trim()) {
+                  socialsMap[key as SocialPlatform] = val;
+                }
+              });
+            }
 
-          return {
-            id: m.id,
-            name: m.name,
-            role: m.role,
-            avatarType: m.avatar_type || "monogram",
-            avatarImage: m.avatar_image || "",
-            gradient: m.gradient || "from-orange-500 to-rose-600",
-            socials: Object.keys(socialsMap).length > 0 ? socialsMap : DEFAULT_SOCIALS,
-          };
-        });
+            return {
+              id: m.id || String(Math.random()),
+              name: m.name || "Miembro",
+              role: m.role || "Staff",
+              avatarType: (m.avatar_type === "image" || m.avatar_image ? "image" : "monogram") as "monogram" | "image",
+              avatarImage: typeof m.avatar_image === "string" ? m.avatar_image : "",
+              gradient: m.gradient || "from-orange-500 to-rose-600",
+              socials: Object.keys(socialsMap).length > 0 ? socialsMap : DEFAULT_SOCIALS,
+            };
+          });
 
-      return {
-        id: group.id,
-        title: group.title,
-        description: group.description,
-        accent: group.accent || "ember",
-        members: groupMembers,
-      };
-    });
+        // Si un grupo estándar en Supabase quedó sin miembros pero existe en TEAM_GROUPS, preservar los locales
+        const fallbackGroup = TEAM_GROUPS.find((tg) => tg.id === group.id);
+        const finalMembers = groupMembers.length > 0 ? groupMembers : (fallbackGroup?.members || []);
+
+        return {
+          id: group.id,
+          title: group.title || fallbackGroup?.title || "Grupo",
+          description: group.description || fallbackGroup?.description || "",
+          accent: (group.accent || fallbackGroup?.accent || "ember") as TeamGroup["accent"],
+          members: finalMembers,
+        };
+      });
+
+    const hasAnyMembers = formattedGroups.some((g) => g.members && g.members.length > 0);
+    if (!hasAnyMembers) {
+      console.warn("[Overplay Team] Ningún grupo contiene miembros, usando datos predeterminados.");
+      return TEAM_GROUPS;
+    }
 
     return formattedGroups;
   } catch (e) {

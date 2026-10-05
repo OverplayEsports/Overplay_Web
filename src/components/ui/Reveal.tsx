@@ -14,7 +14,7 @@ interface RevealProps {
 }
 
 /** Aparición al hacer scroll hacia abajo: difuminado + deslizado suave + fade. */
-export function Reveal({ children, className, delay = 0, y = 32, once = true, blur = 14 }: RevealProps) {
+export function Reveal({ children, className, delay = 0, y = 24, once = true, blur = 10 }: RevealProps) {
   const reduce = useReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
@@ -22,8 +22,8 @@ export function Reveal({ children, className, delay = 0, y = 32, once = true, bl
       className={className}
       initial={{ opacity: 0, y, scale: 0.985, filter: `blur(${blur}px)` }}
       whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      viewport={{ once, margin: "-60px 0px -60px 0px" }}
-      transition={{ duration: 0.85, delay, ease: EASE }}
+      viewport={{ once, amount: 0.05 }}
+      transition={{ duration: 0.7, delay, ease: EASE }}
     >
       {children}
     </motion.div>
@@ -43,18 +43,18 @@ const parentVariants = (gap: number, delay: number): Variants => ({
 });
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30, scale: 0.98, filter: "blur(10px)" },
+  hidden: { opacity: 0, y: 20, scale: 0.98, filter: "blur(6px)" },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
     filter: "blur(0px)",
-    transition: { duration: 0.75, ease: EASE },
+    transition: { duration: 0.6, ease: EASE },
   },
 };
 
 /** Contenedor que orquesta la entrada escalonada de sus hijos <StaggerItem>. */
-export function Stagger({ children, className, gap = 0.08, delay = 0 }: StaggerProps) {
+export function Stagger({ children, className, gap = 0.06, delay = 0 }: StaggerProps) {
   const reduce = useReducedMotion();
   if (reduce) return <div className={className}>{children}</div>;
   return (
@@ -63,7 +63,7 @@ export function Stagger({ children, className, gap = 0.08, delay = 0 }: StaggerP
       variants={parentVariants(gap, delay)}
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, margin: "-40px 0px -40px 0px" }}
+      viewport={{ once: true, amount: 0.05 }}
     >
       {children}
     </motion.div>
