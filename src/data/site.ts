@@ -54,6 +54,10 @@ export interface HeroData {
   playersCount: string;
   communityCount: string;
   backgroundImage?: string;
+  clipVideoUrl?: string;
+  clipTitle?: string;
+  clipSubtitle?: string;
+  clipBadge?: string;
 }
 
 export const DEFAULT_HERO_DATA: HeroData = {
@@ -70,6 +74,10 @@ export const DEFAULT_HERO_DATA: HeroData = {
   playersCount: "+300",
   communityCount: "+1.2K",
   backgroundImage: "/images/hero-bg.jpg",
+  clipVideoUrl: "",
+  clipTitle: "Highlight Reel",
+  clipSubtitle: "Las mejores jugadas de la comunidad",
+  clipBadge: "Clip Oficial",
 };
 
 export const DEFAULT_TICKER_ITEMS: string[] = [
