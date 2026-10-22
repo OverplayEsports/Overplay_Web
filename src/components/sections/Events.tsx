@@ -207,11 +207,6 @@ export function Events({ showRules = true }: EventsProps) {
             </Reveal>
 
             <div className="relative">
-              {/* Línea conectora — desktop */}
-              <span
-                aria-hidden
-                className="absolute left-0 right-0 top-9 hidden h-px bg-gradient-to-r from-orange-500/50 via-white/10 to-violet-500/50 md:block"
-              />
               <Stagger gap={0.12} className="grid gap-5 sm:grid-cols-2 md:grid-cols-4">
                 {eventData.processPhases.map((phase) => {
                   const PhaseIcon = ICON_MAP[phase.icon] || Swords;
