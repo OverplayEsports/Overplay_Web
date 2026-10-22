@@ -7,6 +7,7 @@ export interface TeamMember {
   id?: string;
   name: string;
   role: string;
+  description?: string;
   avatarType?: "monogram" | "image";
   avatarImage?: string;
   socials?: Partial<Record<SocialPlatform, string>>;
@@ -36,12 +37,12 @@ export const TEAM_GROUPS: TeamGroup[] = [
     description: "La cabina de mando: organización, producción y dirección de cada evento.",
     accent: "ember",
     members: [
-      { name: "Nosotros", role: "Dirección", gradient: "from-orange-500 to-rose-600", socials: DEFAULT_SOCIALS },
-      { name: "Aner", role: "Coordinación", gradient: "from-rose-500 to-orange-600", socials: DEFAULT_SOCIALS },
-      { name: "Sher", role: "Gestión de eventos", gradient: "from-amber-500 to-red-600", socials: DEFAULT_SOCIALS },
-      { name: "Zation", role: "Operaciones", gradient: "from-orange-600 to-amber-500", socials: DEFAULT_SOCIALS },
-      { name: "Yor", role: "Producción", gradient: "from-red-500 to-rose-600", socials: DEFAULT_SOCIALS },
-      { name: "Finis", role: "Staff", gradient: "from-orange-500 to-red-600", socials: DEFAULT_SOCIALS },
+      { name: "Nosotros", role: "Dirección", description: "Liderazgo, dirección general y visión competitiva de la comunidad.", gradient: "from-orange-500 to-rose-600", socials: DEFAULT_SOCIALS },
+      { name: "Aner", role: "Coordinación", description: "Planificación estratégica y coordinación entre equipos y organizadores.", gradient: "from-rose-500 to-orange-600", socials: DEFAULT_SOCIALS },
+      { name: "Sher", role: "Gestión de eventos", description: "Supervisión logística y gestión de brackets en tiempo real.", gradient: "from-amber-500 to-red-600", socials: DEFAULT_SOCIALS },
+      { name: "Zation", role: "Operaciones", description: "Infraestructura técnica, bots y soporte continuo durante las jornadas.", gradient: "from-orange-600 to-amber-500", socials: DEFAULT_SOCIALS },
+      { name: "Yor", role: "Producción", description: "Realización técnica, streams oficiales y casters en vivo.", gradient: "from-red-500 to-rose-600", socials: DEFAULT_SOCIALS },
+      { name: "Finis", role: "Staff", description: "Atención a participantes y soporte en el Discord de torneos.", gradient: "from-orange-500 to-red-600", socials: DEFAULT_SOCIALS },
     ],
   },
   {
@@ -50,8 +51,8 @@ export const TEAM_GROUPS: TeamGroup[] = [
     description: "La identidad visual de Overplay: diseño, ilustración y gráficos de cada torneo.",
     accent: "violet",
     members: [
-      { name: "Pombetito", role: "Dirección de arte", gradient: "from-violet-500 to-fuchsia-600", socials: DEFAULT_SOCIALS },
-      { name: "Fran", role: "Diseño gráfico", gradient: "from-fuchsia-500 to-purple-600", socials: DEFAULT_SOCIALS },
+      { name: "Pombetito", role: "Dirección de arte", description: "Diseño de identidad visual, conceptos gráficos y dirección estética.", gradient: "from-violet-500 to-fuchsia-600", socials: DEFAULT_SOCIALS },
+      { name: "Fran", role: "Diseño gráfico", description: "Banners, creatividades promocionales y overlays de stream.", gradient: "from-fuchsia-500 to-purple-600", socials: DEFAULT_SOCIALS },
     ],
   },
   {
@@ -60,9 +61,9 @@ export const TEAM_GROUPS: TeamGroup[] = [
     description: "Orden y fair play: la comunidad segura dentro y fuera de las partidas.",
     accent: "crimson",
     members: [
-      { name: "Ketos", role: "Moderador jefe", gradient: "from-red-600 to-orange-500", socials: DEFAULT_SOCIALS },
-      { name: "Ronet", role: "Moderador", gradient: "from-rose-600 to-red-500", socials: DEFAULT_SOCIALS },
-      { name: "Shadow", role: "Moderador", gradient: "from-red-500 to-purple-600", socials: DEFAULT_SOCIALS },
+      { name: "Ketos", role: "Moderador jefe", description: "Responsable de arbitraje, resolución de disputas y fair play.", gradient: "from-red-600 to-orange-500", socials: DEFAULT_SOCIALS },
+      { name: "Ronet", role: "Moderador", description: "Control de salas de juego, verificación de jugadores y normas.", gradient: "from-rose-600 to-red-500", socials: DEFAULT_SOCIALS },
+      { name: "Shadow", role: "Moderador", description: "Moderación de canales de chat, comunidad y soporte en directo.", gradient: "from-red-500 to-purple-600", socials: DEFAULT_SOCIALS },
     ],
   },
 ];
@@ -116,6 +117,7 @@ export async function fetchTeamGroups(): Promise<TeamGroup[]> {
               id: m.id || String(Math.random()),
               name: m.name || "Miembro",
               role: m.role || "Staff",
+              description: typeof m.description === "string" ? m.description : "",
               avatarType: (m.avatar_type === "image" || m.avatar_image ? "image" : "monogram") as "monogram" | "image",
               avatarImage: typeof m.avatar_image === "string" ? m.avatar_image : "",
               gradient: m.gradient || "from-orange-500 to-rose-600",

@@ -49,10 +49,16 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
     typeof member.avatarImage === "string" &&
     member.avatarImage.trim().length > 0;
 
+  // Filtrar solo las redes sociales que tengan una URL válida (distinta de "#")
+  const activeSocials = SOCIAL_ORDER.filter((platform) => {
+    const href = member.socials?.[platform];
+    return typeof href === "string" && href.trim().length > 0 && href !== "#";
+  });
+
   return (
     <article
       className={cn(
-        "card-surface group relative flex h-full flex-col items-center gap-3.5 overflow-hidden rounded-2xl p-5 text-center",
+        "card-surface group relative flex h-full flex-row items-stretch overflow-hidden rounded-2xl p-4 sm:p-5",
         "transition-all duration-500 ease-out will-change-transform hover:-translate-y-1.5",
         styles.hover
       )}
@@ -68,42 +74,62 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
       {/* Glow ambiental */}
       <span
         aria-hidden
-        className="absolute -top-16 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full bg-white/[0.06] blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        className="absolute -top-16 left-1/4 h-32 w-32 -translate-x-1/2 rounded-full bg-white/[0.06] blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none"
       />
-      <div className="transition-transform duration-500 group-hover:scale-[1.06]">
-        {isImageAvatar ? (
-          <div className="relative h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-full ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-orange-400/60 transition-all">
-            <img
-              src={member.avatarImage}
-              alt={member.name || "Miembro"}
-              onError={() => setImgError(true)}
-              className="h-full w-full rounded-full object-cover"
-              loading="lazy"
+
+      {/* 1. Lado Izquierdo: Imagen / Avatar */}
+      <div className="shrink-0 flex items-start pt-0.5">
+        <div className="transition-transform duration-500 group-hover:scale-105">
+          {isImageAvatar ? (
+            <div className="relative h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-2xl ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-orange-400/60 transition-all">
+              <img
+                src={member.avatarImage}
+                alt={member.name || "Miembro"}
+                onError={() => setImgError(true)}
+                className="h-full w-full rounded-2xl object-cover"
+                loading="lazy"
+              />
+            </div>
+          ) : (
+            <MonogramAvatar
+              name={member.name || "OP"}
+              gradient={member.gradient || "from-orange-500 to-rose-600"}
+              size="md"
+              rounded="xl"
             />
-          </div>
-        ) : (
-          <MonogramAvatar name={member.name || "OP"} gradient={member.gradient || "from-orange-500 to-rose-600"} size="lg" />
-        )}
+          )}
+        </div>
       </div>
-      <div>
-        <h4 className="font-display text-base font-bold uppercase italic tracking-wide text-white">
+
+      {/* 2. Centro: Nombre, Rol y Descripción */}
+      <div className="flex-1 min-w-0 px-3.5 sm:px-4 flex flex-col justify-center text-left">
+        <h4 className="font-display text-base sm:text-lg font-bold uppercase italic tracking-wide text-white truncate">
           {member.name || "Miembro"}
         </h4>
-        <p className="mt-0.5 text-xs text-white/50">{member.role || "Staff"}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-orange-400/90 truncate">
+          {member.role || "Staff"}
+        </p>
+        {member.description && (
+          <p className="mt-1.5 text-xs leading-relaxed text-white/55 line-clamp-2">
+            {member.description}
+          </p>
+        )}
       </div>
-      {member.socials && (
-        <div className="mt-auto flex w-full flex-nowrap items-center justify-center gap-1.5 border-t border-white/[0.07] pt-3.5">
-          {SOCIAL_ORDER.map((platform) => {
+
+      {/* 3. Lado Derecho: Redes sociales en columna vertical (solo las activas) */}
+      {activeSocials.length > 0 && (
+        <div className="shrink-0 flex flex-col items-center justify-center gap-1.5 pl-2.5 sm:pl-3 border-l border-white/[0.08]">
+          {activeSocials.map((platform) => {
             const href = member.socials?.[platform];
-            if (!href || href === "#") return null;
+            if (!href) return null;
             return (
               <SocialButton
                 key={platform}
                 platform={platform}
                 href={href}
                 label={`${member.name || "Miembro"} en ${platform}`}
-                className="h-6.5 w-6.5 sm:h-7 sm:w-7 shrink-0 rounded-full border-white/10 bg-white/[0.03] text-white/50 hover:border-orange-400/50 hover:bg-orange-500/10 hover:text-white"
-                iconClassName="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                className="h-7 w-7 shrink-0 rounded-full border-white/10 bg-white/[0.03] text-white/50 hover:border-orange-400/50 hover:bg-orange-500/10 hover:text-white"
+                iconClassName="h-3.5 w-3.5"
               />
             );
           })}
@@ -191,7 +217,7 @@ export function About() {
 
                 <Stagger
                   gap={0.07}
-                  className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6"
+                  className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
                 >
                   {group.members.map((member) => (
                     <StaggerItem key={member.id || member.name}>
