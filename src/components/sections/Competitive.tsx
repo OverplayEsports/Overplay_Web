@@ -36,22 +36,16 @@ function PlayerCard({ player }: { player: Player }) {
           : "border-white/10"
       )}
     >
-      {/* Barra superior animada */}
-      <span
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[2.5px] origin-left scale-x-0 bg-brand-gradient transition-transform duration-500 group-hover:scale-x-100 z-20"
-      />
-
-      {/* Glow de fondo */}
-      <span
-        aria-hidden
-        className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-orange-500/10 blur-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-100 pointer-events-none"
-      />
-
       {/* 1. Bloque Horizontal Principal */}
-      <div className="relative min-h-[125px] sm:min-h-[135px] overflow-hidden">
+      <div className="relative min-h-[135px] sm:min-h-[145px] overflow-hidden">
         {/* Fondo del lado izquierdo: Imagen usando el alto total y degradado hacia la derecha */}
-        <div className="absolute left-0 top-0 bottom-0 w-28 sm:w-36 overflow-hidden pointer-events-none">
+        <div
+          className="absolute left-0 top-0 bottom-0 w-28 sm:w-40 overflow-hidden pointer-events-none"
+          style={{
+            maskImage: "linear-gradient(to right, black 50%, transparent 95%)",
+            WebkitMaskImage: "linear-gradient(to right, black 50%, transparent 95%)",
+          }}
+        >
           {isImageAvatar ? (
             <img
               src={player.avatarImage}
@@ -63,20 +57,19 @@ function PlayerCard({ player }: { player: Player }) {
           ) : (
             <div
               className={cn(
-                "h-full w-full flex items-center justify-center font-display font-black text-3xl sm:text-4xl text-white/90 bg-gradient-to-br",
+                "h-full w-full flex items-center justify-center font-display font-black text-2xl sm:text-4xl text-white/90 bg-gradient-to-br",
                 player.gradient || "from-orange-500 to-rose-600"
               )}
             >
               {player.name ? player.name.slice(0, 2).toUpperCase() : "UL"}
             </div>
           )}
-          {/* Degradado hacia la derecha para fundirse con la casilla */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent 60% to-[#0b0b0e]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0e]/50 via-transparent to-black/20" />
+          {/* Degradado sobre la imagen en la parte derecha para fundirse con la casilla */}
+          <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-r from-transparent to-[#0b0b0e] pointer-events-none" />
         </div>
 
         {/* Textos y contenido a la derecha de la imagen */}
-        <div className="relative z-10 flex h-full flex-col justify-between pl-28 sm:pl-36 pr-3.5 sm:pr-4 py-3 sm:py-3.5">
+        <div className="relative z-10 flex h-full flex-col justify-between pl-24 sm:pl-36 pr-3 sm:pr-4 py-3 sm:py-3.5">
           <div>
             {/* Nombre arriba y Tag */}
             <div className="flex items-start justify-between gap-1.5">
@@ -97,17 +90,17 @@ function PlayerCard({ player }: { player: Player }) {
           {/* Abajo: Los 3 héroes más usados en una línea horizontal + Botón Ver detalles */}
           <div className="mt-2.5 flex items-center justify-between gap-2">
             {topHeroes.length > 0 ? (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {topHeroes.slice(0, 3).map((hero, idx) => (
                   <div
                     key={idx}
                     title={hero}
-                    className="group/hero relative h-7 w-7 sm:h-8 sm:w-8 shrink-0 overflow-hidden rounded-lg border border-white/20 bg-black/70 p-0.5 shadow-md ring-1 ring-white/10 transition-transform hover:scale-110"
+                    className="group/hero relative h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/70 p-0.5 shadow-md ring-1 ring-white/10 transition-transform hover:scale-110"
                   >
                     <img
                       src={`/images/Overwatch/${hero}.png`}
                       alt={hero}
-                      className="h-full w-full rounded-md object-cover"
+                      className="h-full w-full rounded-lg object-cover"
                       loading="lazy"
                     />
                   </div>
@@ -118,7 +111,7 @@ function PlayerCard({ player }: { player: Player }) {
             )}
 
             {/* Botón de despliegue interactivo */}
-            <div className="flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-white/50 transition-colors group-hover:border-orange-400/40 group-hover:text-white">
+            <div className="flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-white/50 transition-colors group-hover:border-orange-400/40 group-hover:text-white shrink-0">
               <span>{isExpanded ? "Cerrar" : "Detalles"}</span>
               <ChevronDown
                 className={cn(
@@ -248,7 +241,7 @@ export function Competitive() {
   }, []);
 
   return (
-    <section id="competitivo" aria-label="Competitivo" className="relative scroll-mt-24 py-24 sm:py-32">
+    <section id="competitivo" aria-label="Competitivo" className="relative scroll-mt-24 pt-6 sm:pt-8 pb-24 sm:pb-32">
       <div
         aria-hidden
         className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"

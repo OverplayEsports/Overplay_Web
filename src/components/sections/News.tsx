@@ -273,6 +273,7 @@ interface NewsProps {
   limit?: number;
   showViewMoreButton?: boolean;
   showSectionNumber?: boolean;
+  standalone?: boolean;
 }
 
 /** IV. NOTICIAS — cobertura de Overwatch, Fortnite, VALORANT y Marvel Rivals con estructura tipo WordPress. */
@@ -281,6 +282,7 @@ export function News({
   limit,
   showViewMoreButton = false,
   showSectionNumber = true,
+  standalone = false,
 }: NewsProps = {}) {
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -323,7 +325,14 @@ export function News({
   }, [items, filter, limit]);
 
   return (
-    <section id="noticias" aria-label="Noticias" className="relative scroll-mt-24 py-24 sm:py-32">
+    <section
+      id="noticias"
+      aria-label="Noticias"
+      className={cn(
+        "relative scroll-mt-24 pb-24 sm:pb-32",
+        standalone ? "pt-6 sm:pt-8" : "py-24 sm:py-32"
+      )}
+    >
       <div
         aria-hidden
         className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"
@@ -356,7 +365,7 @@ export function News({
                   onClick={() => setFilter(cat.id)}
                   aria-pressed={isActive}
                   className={cn(
-                    "relative rounded-full px-5 py-2.5 font-display text-xs font-bold uppercase tracking-[0.18em] transition-colors duration-300 cursor-pointer",
+                    "relative rounded-full px-3.5 sm:px-5 py-2 sm:py-2.5 font-display text-[11px] sm:text-xs font-bold uppercase tracking-[0.16em] sm:tracking-[0.18em] transition-colors duration-300 cursor-pointer",
                     isActive ? "text-white" : "text-white/50 hover:text-white"
                   )}
                 >

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Palette, ShieldCheck, Sparkles, Users } from "lucide-react";
-import { TEAM_GROUPS, fetchTeamGroups, type TeamGroup } from "../../data/team";
+import { TEAM_GROUPS, fetchTeamGroups, getCachedTeamGroups, type TeamGroup } from "../../data/team";
 import { SectionHeading } from "../ui/SectionHeading";
 import { MonogramAvatar } from "../ui/MonogramAvatar";
 import { SocialButton } from "../ui/SocialIcons";
@@ -78,7 +78,7 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
       />
 
       {/* 1. Lado Izquierdo: Imagen / Avatar usando el alto proporcional de la casilla */}
-      <div className="relative shrink-0 self-stretch aspect-square min-w-[84px] sm:min-w-[96px] max-w-[124px] overflow-hidden rounded-xl sm:rounded-2xl ring-1 ring-white/15 bg-white/[0.02] shadow-md group-hover:ring-orange-400/50 transition-all duration-300">
+      <div className="relative shrink-0 self-stretch aspect-square min-w-[72px] sm:min-w-[96px] max-w-[124px] overflow-hidden rounded-xl sm:rounded-2xl ring-1 ring-white/15 bg-white/[0.02] shadow-md group-hover:ring-orange-400/50 transition-all duration-300">
         {isImageAvatar ? (
           <img
             src={member.avatarImage}
@@ -140,7 +140,7 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
 
 /** I. SOBRE NOSOTROS — presentación de la organización y su equipo con sincronización Supabase. */
 export function About() {
-  const [groups, setGroups] = useState<TeamGroup[]>(TEAM_GROUPS);
+  const [groups, setGroups] = useState<TeamGroup[]>(getCachedTeamGroups);
 
   useEffect(() => {
     let alive = true;
@@ -156,7 +156,7 @@ export function About() {
   }, []);
 
   return (
-    <section id="nosotros" aria-label="Sobre Nosotros" className="relative scroll-mt-24 py-24 sm:py-32">
+    <section id="nosotros" aria-label="Sobre Nosotros" className="relative scroll-mt-24 pt-6 sm:pt-8 pb-24 sm:pb-32">
       <div
         aria-hidden
         className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"

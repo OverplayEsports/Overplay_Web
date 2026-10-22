@@ -63,14 +63,14 @@ export function RulesPage() {
   };
 
   return (
-    <div className="relative min-h-screen pt-20 sm:pt-24 pb-16">
+    <div className="relative min-h-screen pt-16 sm:pt-[4.5rem] pb-16">
       {/* Ambiente luminoso de fondo */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 right-1/4 h-[36rem] w-[36rem] rounded-full bg-orange-600/10 blur-[150px]" />
         <div className="absolute top-96 left-[-10rem] h-[32rem] w-[32rem] rounded-full bg-violet-600/10 blur-[160px]" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-4xl px-4 sm:px-6 py-8 sm:py-12">
+      <div className="relative mx-auto w-full max-w-4xl px-4 sm:px-6 pt-6 sm:pt-8 pb-12 sm:pb-16">
         {/* Breadcrumb / Botón de retorno y Botón Descargar Arriba */}
         <Reveal className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <a

@@ -6,8 +6,8 @@ import { FinalCTA } from "../components/FinalCTA";
  */
 export function NewsPage() {
   return (
-    <div className="pt-20 sm:pt-24">
-      <News />
+    <div className="pt-16 sm:pt-[4.5rem]">
+      <News standalone={true} />
       <FinalCTA />
     </div>
   );

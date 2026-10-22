@@ -38,10 +38,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 interface EventsProps {
   showRules?: boolean;
+  standalone?: boolean;
 }
 
 /** II. EVENTOS — pieza central: Overplay Tourney 4 & Reglamento Oficial sincronizado con Supabase. */
-export function Events({ showRules = true }: EventsProps) {
+export function Events({ showRules = true, standalone = false }: EventsProps) {
   const [eventData, setEventData] = useState<EventData>(DEFAULT_EVENT_DATA);
 
   useEffect(() => {
@@ -56,7 +57,14 @@ export function Events({ showRules = true }: EventsProps) {
   }, []);
 
   return (
-    <section id="eventos" aria-label="Eventos" className="relative scroll-mt-24 overflow-hidden py-24 sm:py-32">
+    <section
+      id="eventos"
+      aria-label="Eventos"
+      className={cn(
+        "relative scroll-mt-24 overflow-hidden pb-24 sm:pb-32",
+        standalone ? "pt-6 sm:pt-8" : "py-24 sm:py-32"
+      )}
+    >
       {/* Ambiente */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute right-[-14rem] top-16 h-[30rem] w-[30rem] rounded-full bg-orange-600/10 blur-[140px]" />

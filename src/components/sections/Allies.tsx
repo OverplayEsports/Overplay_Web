@@ -5,6 +5,7 @@ import { SectionHeading } from "../ui/SectionHeading";
 import { MonogramAvatar } from "../ui/MonogramAvatar";
 import { SocialButton } from "../ui/SocialIcons";
 import { Reveal, Stagger, StaggerItem } from "../ui/Reveal";
+import { cn } from "../../utils/cn";
 
 function AllyCard({ ally }: { ally: Ally }) {
   const [imgError, setImgError] = useState(false);
@@ -15,47 +16,49 @@ function AllyCard({ ally }: { ally: Ally }) {
     ally.avatarImage.trim().length > 0;
 
   return (
-    <article className="group relative flex h-full flex-col items-center gap-4 overflow-hidden rounded-3xl border border-white/[0.08] bg-white/[0.03] p-7 text-center backdrop-blur-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-violet-400/30 hover:bg-white/[0.05] hover:shadow-[0_24px_60px_-26px_rgba(139,92,246,0.5)]">
-      {/* Resplandor superior */}
-      <span
-        aria-hidden
-        className="absolute -top-20 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-violet-500/15 blur-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-      />
-      <div className="relative">
-        <span
-          aria-hidden
-          className="absolute -inset-1.5 rounded-full bg-brand-gradient opacity-40 blur-md transition-opacity duration-500 group-hover:opacity-90"
-        />
+    <article className="isolate group relative flex h-full min-h-[380px] sm:min-h-[420px] flex-col justify-end overflow-hidden rounded-3xl border border-white/[0.08] bg-[#0c0c10] p-6 text-center transition-all duration-500 hover:-translate-y-1.5 hover:border-violet-400/40 hover:shadow-[0_24px_60px_-26px_rgba(139,92,246,0.35)]">
+      {/* 1. Fondo superior: Imagen de fondo degradada hacia abajo a la altura del nombre */}
+      <div className="absolute inset-x-0 top-0 h-[260px] sm:h-[280px] overflow-hidden rounded-t-3xl pointer-events-none">
         {isImageAvatar ? (
-          <div className="relative h-16 w-16 overflow-hidden rounded-full ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-violet-400/60 transition-transform duration-500 group-hover:scale-105">
-            <img
-              src={ally.avatarImage}
-              alt={ally.name || "Aliado"}
-              onError={() => setImgError(true)}
-              className="h-full w-full rounded-full object-cover"
-              loading="lazy"
-            />
-          </div>
+          <img
+            src={ally.avatarImage}
+            alt={ally.name || "Aliado"}
+            onError={() => setImgError(true)}
+            className="h-full w-full object-cover object-top transition-transform duration-700 will-change-transform group-hover:scale-105"
+            loading="lazy"
+          />
         ) : (
-          <MonogramAvatar
-            name={ally.name || "OP"}
-            gradient={ally.gradient || "from-violet-500 to-fuchsia-600"}
-            size="lg"
-            rounded="full"
-            className="relative transition-transform duration-500 group-hover:scale-105"
+          <div
+            className={cn(
+              "h-full w-full flex items-center justify-center bg-gradient-to-br opacity-25",
+              ally.gradient || "from-violet-500 to-fuchsia-600"
+            )}
           />
         )}
+        {/* Degradado hacia abajo: a la altura del nombre se funde con el fondo de la casilla */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-15% via-[#0c0c10]/75 via-60% to-[#0c0c10]" />
       </div>
-      <div>
-        <span className="rounded-full border border-violet-400/25 bg-violet-500/10 px-3 py-1 font-display text-[9px] font-bold uppercase tracking-[0.22em] text-violet-200/90">
+
+      {/* 2. Textos bajados, más juntos a la línea de redes sociales */}
+      <div className="relative z-10 flex flex-col items-center mt-auto">
+        {/* Badge / Etiqueta */}
+        <span className="rounded-full border border-violet-400/25 bg-[#0c0c10]/90 px-3.5 py-1 font-display text-[9px] font-bold uppercase tracking-[0.22em] text-violet-200/90 shadow-sm">
           {ally.badge}
         </span>
-        <h4 className="mt-3 font-display text-xl font-bold uppercase italic tracking-wide text-white">
+
+        {/* Nombre del aliado a la altura del degradado */}
+        <h4 className="mt-2.5 font-display text-xl sm:text-2xl font-bold uppercase italic tracking-wide text-white drop-shadow-md">
           {ally.name}
         </h4>
-        <p className="mt-2 text-sm leading-relaxed text-white/50">{ally.description}</p>
+
+        {/* Descripción */}
+        <p className="mt-2 text-xs sm:text-sm leading-relaxed text-white/55 line-clamp-3">
+          {ally.description}
+        </p>
       </div>
-      <div className="mt-auto flex flex-wrap items-center justify-center gap-2 border-t border-white/[0.07] pt-4">
+
+      {/* 3. Redes sociales (sin botón de canal) */}
+      <div className="relative z-10 mt-5 flex flex-wrap items-center justify-center gap-2 border-t border-white/[0.08] pt-3.5">
         {ally.socials &&
           (Object.entries(ally.socials) as [keyof typeof ally.socials, string][]).map(
             ([platform, href]) =>
@@ -65,24 +68,14 @@ function AllyCard({ ally }: { ally: Ally }) {
                   key={platform}
                   platform={platform}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   label={`${ally.name} en ${platform}`}
                   className="h-8 w-8 hover:border-violet-400/50 hover:bg-violet-500/10"
                   iconClassName="h-3.5 w-3.5"
                 />
               )
           )}
-        {ally.link && ally.link !== "#" && (
-          <a
-            href={ally.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Visitar el canal de ${ally.name}`}
-            className="inline-flex h-8 items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 font-display text-[10px] font-bold uppercase tracking-[0.16em] text-white/60 transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-400/50 hover:bg-violet-500/10 hover:text-white"
-          >
-            Canal
-            <ArrowUpRight className="h-3 w-3" />
-          </a>
-        )}
       </div>
     </article>
   );
@@ -128,7 +121,7 @@ export function Allies() {
   const emptySlots = Math.max(0, 7 - allies.length);
 
   return (
-    <section id="aliados" aria-label="Aliados" className="relative scroll-mt-24 py-24 sm:py-32">
+    <section id="aliados" aria-label="Aliados" className="relative scroll-mt-24 pt-6 sm:pt-8 pb-24 sm:pb-32">
       <div
         aria-hidden
         className="absolute left-0 top-0 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"

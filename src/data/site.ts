@@ -109,21 +109,45 @@ export const DEFAULT_CTA_DATA: CtaData = {
   bannerImage: "/images/tourney-banner.jpg",
 };
 
-/** Obtener configuración de Hero desde Supabase */
+/** Obtener configuración de Hero y Clips del Home desde Supabase */
 export async function fetchHeroData(): Promise<HeroData> {
   try {
+    let heroObj = { ...DEFAULT_HERO_DATA };
+
+    // 1. Cargar configuración base de Hero
     const { data, error } = await supabase
       .from("team_groups")
       .select("description")
       .eq("id", "config_hero")
-      .single();
+      .maybeSingle();
 
     if (!error && data?.description) {
       const parsed = JSON.parse(data.description);
       if (parsed && parsed.hero) {
-        return { ...DEFAULT_HERO_DATA, ...parsed.hero };
+        heroObj = { ...heroObj, ...parsed.hero };
       }
     }
+
+    // 2. Cargar configuración dedicada de Clips del Home si existe
+    const { data: clipsData } = await supabase
+      .from("team_groups")
+      .select("description")
+      .eq("id", "config_home_clips")
+      .maybeSingle();
+
+    if (clipsData?.description) {
+      try {
+        const clipsParsed = JSON.parse(clipsData.description);
+        if (clipsParsed) {
+          if (clipsParsed.title) heroObj.clipTitle = clipsParsed.title;
+          if (clipsParsed.activeClipUrl) heroObj.clipVideoUrl = clipsParsed.activeClipUrl;
+        }
+      } catch (e) {
+        console.warn("[Clips] Error al parsear config_home_clips:", e);
+      }
+    }
+
+    return heroObj;
   } catch (err) {
     console.warn("[Hero] Usando datos locales:", err);
   }

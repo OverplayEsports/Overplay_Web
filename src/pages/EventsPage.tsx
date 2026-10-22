@@ -6,8 +6,8 @@ import { FinalCTA } from "../components/FinalCTA";
  */
 export function EventsPage() {
   return (
-    <div className="pt-20 sm:pt-24">
-      <Events showRules={true} />
+    <div className="pt-16 sm:pt-[4.5rem]">
+      <Events showRules={true} standalone={true} />
       <FinalCTA />
     </div>
   );

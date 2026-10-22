@@ -82,14 +82,14 @@ export function NewsDetailPage({ articleId }: NewsDetailPageProps) {
     : CATEGORY_STYLES.overwatch;
 
   return (
-    <div className="pt-20 sm:pt-24 pb-20">
+    <div className="pt-16 sm:pt-[4.5rem] pb-20">
       {/* Fondo ambiental */}
       <div aria-hidden className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute left-1/2 top-20 -translate-x-1/2 h-[32rem] w-[50rem] rounded-full bg-orange-500/10 blur-[150px]" />
         <div className="absolute right-0 top-1/3 h-[24rem] w-[24rem] rounded-full bg-violet-600/10 blur-[130px]" />
       </div>
 
-      <div className="relative mx-auto w-full max-w-5xl px-5 sm:px-8">
+      <div className="relative mx-auto w-full max-w-5xl px-5 sm:px-8 pt-4 sm:pt-6">
         {/* Barra superior de navegación / Breadcrumbs */}
         <div className="flex flex-wrap items-center justify-between gap-4 py-4 mb-4 border-b border-white/10">
           <a

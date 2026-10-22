@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronDown, Swords } from "lucide-react";
+import { ChevronDown, Swords, Play, Pause } from "lucide-react";
 import { Button } from "./ui/Button";
 import { DEFAULT_HERO_DATA, fetchHeroData, type HeroData } from "../data/site";
+import { cn } from "../utils/cn";
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -10,6 +11,19 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 export function Hero() {
   const reduce = useReducedMotion();
   const [hero, setHero] = useState<HeroData>(DEFAULT_HERO_DATA);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  };
 
   useEffect(() => {
     let alive = true;
@@ -103,10 +117,10 @@ export function Hero() {
       </div>
 
       {/* Contenido */}
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-28 pt-36 sm:px-8 sm:pt-40">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-8 pb-20 sm:pb-28 pt-28 sm:pt-36 lg:pt-40">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10 xl:gap-12">
           {/* Lado izquierdo: Titulares, descripción, botones y estadísticas */}
-          <div className="lg:col-span-7 xl:col-span-7">
+          <div className="lg:col-span-6 xl:col-span-6">
             <motion.div {...rise(0.05)} className="mb-7 flex items-center gap-4">
               <span className="h-px w-12 bg-gradient-to-r from-orange-500 to-transparent" aria-hidden />
               <p className="font-display text-[11px] font-semibold uppercase tracking-[0.4em] text-orange-300/90 sm:text-xs">
@@ -154,14 +168,14 @@ export function Hero() {
             {/* Estadísticas */}
             <motion.dl
               {...rise(0.64)}
-              className="mt-12 grid max-w-lg grid-cols-3 gap-6 border-t border-white/10 pt-6 sm:mt-16"
+              className="mt-10 grid max-w-lg grid-cols-3 gap-3 sm:gap-6 border-t border-white/10 pt-6 sm:mt-16"
             >
               {stats.map((stat) => (
                 <div key={stat.label} className="flex flex-col">
-                  <dt className="order-2 mt-1 block font-display text-[11px] font-semibold uppercase tracking-[0.28em] text-white/45">
+                  <dt className="order-2 mt-1 block font-display text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.2em] sm:tracking-[0.28em] text-white/45 truncate">
                     {stat.label}
                   </dt>
-                  <dd className="font-display text-2xl font-bold italic text-white first:mt-0 sm:text-3xl">
+                  <dd className="font-display text-xl sm:text-2xl md:text-3xl font-bold italic text-white first:mt-0">
                     {stat.value}
                   </dd>
                 </div>
@@ -169,86 +183,83 @@ export function Hero() {
             </motion.dl>
           </div>
 
-          {/* Lado derecho: Recuadro de Clips R2 Cloudflare */}
-          <motion.div {...rise(0.4)} className="lg:col-span-5 xl:col-span-5">
-            <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+          {/* Lado derecho: Pantalla Visualizador de Clips sin marcos (más grande y simétrico) */}
+          <motion.div {...rise(0.4)} className="lg:col-span-6 xl:col-span-6 flex flex-col justify-center">
+            <div className="relative mx-auto w-full max-w-xl lg:max-w-none">
               {/* Glow ambiental detrás del reproductor */}
               <div
                 aria-hidden
-                className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-orange-500/25 via-rose-500/20 to-purple-600/25 blur-xl opacity-75 transition-opacity duration-700"
+                className="absolute -inset-2 rounded-3xl bg-gradient-to-r from-orange-500/20 via-rose-500/15 to-purple-600/20 blur-2xl opacity-75 pointer-events-none"
               />
 
-              <div className="relative overflow-hidden rounded-2xl border border-white/15 bg-[#0b0b0e]/90 p-3 shadow-2xl backdrop-blur-xl sm:rounded-3xl sm:p-4">
-                {/* Cabecera del reproductor */}
-                <div className="mb-3 flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
+              {/* Pantalla visualizador directa (sin marcos ni casillas exteriores) */}
+              <div
+                onClick={togglePlay}
+                className="group relative aspect-video w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-black shadow-2xl ring-1 ring-white/10 cursor-pointer select-none"
+              >
+                {hero.clipVideoUrl ? (
+                  <video
+                    ref={videoRef}
+                    key={hero.clipVideoUrl}
+                    src={hero.clipVideoUrl}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  /* Vista previa visual cuando no hay video cargado */
+                  <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-[#0c0c10] via-[#120a1a] to-[#1a0c08] p-6 text-center">
+                    <div className="absolute inset-0 bg-grid opacity-30" />
+                    <div className="relative z-10 flex flex-col items-center">
+                      <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-400 shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-transform duration-300 group-hover:scale-110">
+                        <Play className="h-6 w-6 fill-current ml-0.5" />
+                      </div>
+                      <p className="font-display text-sm font-bold uppercase tracking-wider text-white">
+                        Pantalla Visualizador
+                      </p>
+                      <p className="mt-1 max-w-[240px] text-xs leading-relaxed text-white/50">
+                        Sube o enlaza un clip en video MP4 desde Cloudflare R2 en el Builder
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Overlay interactivo para pausar / continuar al pasar el mouse por encima */}
+                <div
+                  className={cn(
+                    "absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 pointer-events-none",
+                    isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100 bg-black/55"
+                  )}
+                >
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white backdrop-blur-md shadow-2xl transition-transform duration-200 group-hover:scale-110">
+                    {isPlaying ? (
+                      <Pause className="h-6 w-6 fill-current text-orange-400" />
+                    ) : (
+                      <Play className="h-6 w-6 fill-current text-orange-400 ml-0.5" />
+                    )}
+                  </div>
+                  <span className="absolute bottom-3 right-3 rounded-lg border border-white/10 bg-black/70 px-2.5 py-1 font-display text-[10px] font-bold uppercase tracking-wider text-white/80 backdrop-blur-md">
+                    {isPlaying ? "Clic para pausar" : "Clic para continuar"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Casilla para el título desplegada desde el borde inferior del player */}
+              {hero.clipTitle && (
+                <div className="mt-4 flex justify-center">
+                  <div className="inline-flex items-center gap-2.5 rounded-2xl border border-white/10 bg-[#0c0c10]/95 px-6 py-2.5 shadow-xl backdrop-blur-md">
                     <span className="relative flex h-2 w-2">
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-500" />
                     </span>
-                    <span className="font-display text-[11px] font-bold uppercase tracking-[0.25em] text-orange-400">
-                      {hero.clipBadge || "Clip Oficial"}
-                    </span>
-                  </div>
-                  <span className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 font-display text-[9px] font-semibold uppercase tracking-wider text-white/50">
-                    Overplay R2
-                  </span>
-                </div>
-
-                {/* Contenedor del video 16:9 */}
-                <div className="group relative aspect-video w-full overflow-hidden rounded-xl border border-white/10 bg-black/80 shadow-inner">
-                  {hero.clipVideoUrl ? (
-                    <video
-                      key={hero.clipVideoUrl}
-                      src={hero.clipVideoUrl}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      controls
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    /* Vista previa interactiva si aún no han colocado enlace de video */
-                    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-black/80 via-[#120a1a]/70 to-[#1a0c08]/80 p-5 text-center">
-                      <div className="absolute inset-0 bg-grid opacity-25" />
-                      <div className="relative z-10 flex flex-col items-center">
-                        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/10 text-orange-400 shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-transform duration-300 group-hover:scale-110">
-                          <svg className="h-5 w-5 fill-current ml-0.5" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </div>
-                        <p className="font-display text-xs font-bold uppercase tracking-wider text-white">
-                          Reproductor de Clips
-                        </p>
-                        <p className="mt-1 max-w-[240px] text-[11px] leading-relaxed text-white/50">
-                          Sube o enlaza un clip en video (MP4/WebM) desde Cloudflare R2 en el Builder
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Línea inferior sutil de degradado */}
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-brand-gradient opacity-70" />
-                </div>
-
-                {/* Pie con título y subtítulo del clip */}
-                <div className="mt-3 flex items-center justify-between px-1">
-                  <div className="min-w-0 pr-2">
-                    <h4 className="truncate font-display text-xs font-bold uppercase italic tracking-wide text-white sm:text-sm">
-                      {hero.clipTitle || "Highlight Reel"}
-                    </h4>
-                    <p className="truncate text-[11px] text-white/50">
-                      {hero.clipSubtitle || "Las mejores jugadas de la comunidad"}
-                    </p>
-                  </div>
-                  <div className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-orange-400/90 font-display uppercase tracking-wider">
-                    <span>1080p</span>
-                    <span className="h-1 w-1 rounded-full bg-white/30" />
-                    <span>60FPS</span>
+                    <h3 className="font-display text-xs sm:text-sm font-bold uppercase italic tracking-wider text-white">
+                      {hero.clipTitle}
+                    </h3>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </motion.div>
         </div>

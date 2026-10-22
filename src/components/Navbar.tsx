@@ -115,7 +115,7 @@ export function Navbar({ currentRoute }: { currentRoute?: string }) {
             animate={reduce ? undefined : { opacity: 1, height: "auto" }}
             exit={reduce ? undefined : { opacity: 0, height: 0 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-b border-white/10 bg-[#070709]/95 backdrop-blur-2xl lg:hidden"
+            className="max-h-[calc(100vh-4.5rem)] overflow-y-auto border-b border-white/10 bg-[#070709]/95 backdrop-blur-2xl lg:hidden"
           >
             <ul className="flex flex-col gap-1 px-5 pb-6 pt-2">
               {NAV_LINKS.map((link, i) => (

@@ -339,7 +339,7 @@ export function TournamentRegistrationModal({
             </div>
           ) : (
             /* Formulario Completo */
-            <form onSubmit={handleSubmit} className="max-h-[85vh] overflow-y-auto p-6 sm:p-8">
+            <form onSubmit={handleSubmit} className="max-h-[88vh] overflow-y-auto p-4 sm:p-6 md:p-8">
               {/* Cabecera */}
               <div className="border-b border-white/10 pb-5 pr-8">
                 <div className="flex items-center gap-2">
@@ -369,7 +369,7 @@ export function TournamentRegistrationModal({
 
               <div className="mt-6 space-y-6">
                 {/* 1. ¿QUIERES SER CAPITÁN EN EL TORNEO? */}
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4.5 sm:p-5">
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5">
                   <div className="flex items-center gap-2">
                     <Crown className="h-4 w-4 text-amber-400" />
                     <label className="text-xs font-bold uppercase tracking-wider text-white/90 sm:text-sm">
@@ -381,11 +381,11 @@ export function TournamentRegistrationModal({
                     Los capitanes participarán en el draft en vivo para seleccionar a sus compañeros de equipo.
                   </p>
 
-                  <div className="mt-3.5 grid grid-cols-2 gap-3">
+                  <div className="mt-3.5 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setIsCaptain(true)}
-                      className={`flex items-center justify-center gap-2 rounded-xl border p-3.5 text-xs font-bold transition-all sm:text-sm ${
+                      className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-bold transition-all sm:text-sm sm:p-3.5 ${
                         isCaptain
                           ? "border-amber-500 bg-amber-500/15 text-amber-300 shadow-lg shadow-amber-500/10"
                           : "border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white"
@@ -398,7 +398,7 @@ export function TournamentRegistrationModal({
                     <button
                       type="button"
                       onClick={() => setIsCaptain(false)}
-                      className={`flex items-center justify-center gap-2 rounded-xl border p-3.5 text-xs font-bold transition-all sm:text-sm ${
+                      className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-bold transition-all sm:text-sm sm:p-3.5 ${
                         !isCaptain
                           ? "border-orange-500 bg-orange-500/15 text-orange-300 shadow-lg shadow-orange-500/10"
                           : "border-white/10 bg-white/5 text-white/70 hover:border-white/20 hover:text-white"
@@ -551,20 +551,20 @@ export function TournamentRegistrationModal({
                         </span>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      <div className="mt-2.5 flex flex-wrap gap-1 sm:gap-1.5">
                         {OVERWATCH_RANKS.map((rank) => (
                           <button
                             key={`tank-${rank.id}`}
                             type="button"
                             onClick={() => setRankTank(rank.id)}
-                            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all ${
+                            className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] sm:px-2.5 sm:py-1.5 sm:text-xs font-medium transition-all ${
                               rankTank === rank.id
                                 ? "border-blue-500 bg-blue-500/20 text-white shadow-sm shadow-blue-500/20"
                                 : "border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white"
                             }`}
                           >
                             {rank.image ? (
-                              <img src={rank.image} alt={rank.name} className="h-4 w-4 object-contain" />
+                              <img src={rank.image} alt={rank.name} className="h-3.5 w-3.5 sm:h-4 sm:w-4 object-contain" />
                             ) : null}
                             <span>{rank.name}</span>
                           </button>
@@ -583,20 +583,20 @@ export function TournamentRegistrationModal({
                         </span>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      <div className="mt-2.5 flex flex-wrap gap-1 sm:gap-1.5">
                         {OVERWATCH_RANKS.map((rank) => (
                           <button
                             key={`dps-${rank.id}`}
                             type="button"
                             onClick={() => setRankDps(rank.id)}
-                            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all ${
+                            className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] sm:px-2.5 sm:py-1.5 sm:text-xs font-medium transition-all ${
                               rankDps === rank.id
                                 ? "border-red-500 bg-red-500/20 text-white shadow-sm shadow-red-500/20"
                                 : "border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white"
                             }`}
                           >
                             {rank.image ? (
-                              <img src={rank.image} alt={rank.name} className="h-4 w-4 object-contain" />
+                              <img src={rank.image} alt={rank.name} className="h-3.5 w-3.5 sm:h-4 sm:w-4 object-contain" />
                             ) : null}
                             <span>{rank.name}</span>
                           </button>
@@ -615,20 +615,20 @@ export function TournamentRegistrationModal({
                         </span>
                       </div>
 
-                      <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      <div className="mt-2.5 flex flex-wrap gap-1 sm:gap-1.5">
                         {OVERWATCH_RANKS.map((rank) => (
                           <button
                             key={`support-${rank.id}`}
                             type="button"
                             onClick={() => setRankSupport(rank.id)}
-                            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all ${
+                            className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] sm:px-2.5 sm:py-1.5 sm:text-xs font-medium transition-all ${
                               rankSupport === rank.id
                                 ? "border-emerald-500 bg-emerald-500/20 text-white shadow-sm shadow-emerald-500/20"
                                 : "border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:text-white"
                             }`}
                           >
                             {rank.image ? (
-                              <img src={rank.image} alt={rank.name} className="h-4 w-4 object-contain" />
+                              <img src={rank.image} alt={rank.name} className="h-3.5 w-3.5 sm:h-4 sm:w-4 object-contain" />
                             ) : null}
                             <span>{rank.name}</span>
                           </button>

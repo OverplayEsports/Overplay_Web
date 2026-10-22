@@ -6,7 +6,7 @@ import { FinalCTA } from "../components/FinalCTA";
  */
 export function CompetitivePage() {
   return (
-    <div className="pt-20 sm:pt-24">
+    <div className="pt-16 sm:pt-[4.5rem]">
       <Competitive />
       <FinalCTA />
     </div>
