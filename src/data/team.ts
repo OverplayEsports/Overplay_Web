@@ -101,10 +101,11 @@ export async function fetchTeamGroups(): Promise<TeamGroup[]> {
         const groupMembers = dbMembers
           .filter((m: any) => m && m.group_id === group.id)
           .map((m: any) => {
-            // Extraer urls activas de socials jsonb
+            // Extraer urls activas de socials jsonb (ignorando claves internas como _description)
             const socialsMap: Partial<Record<SocialPlatform, string>> = {};
             if (m.socials && typeof m.socials === "object") {
               Object.entries(m.socials).forEach(([key, val]: [string, any]) => {
+                if (key.startsWith("_")) return;
                 if (val && typeof val === "object" && val.enabled && val.url) {
                   socialsMap[key as SocialPlatform] = val.url;
                 } else if (typeof val === "string" && val.trim()) {
@@ -113,11 +114,16 @@ export async function fetchTeamGroups(): Promise<TeamGroup[]> {
               });
             }
 
+            const memberDescription =
+              (typeof m.description === "string" && m.description.trim()) ||
+              (typeof m.socials?._description === "string" && m.socials._description.trim()) ||
+              "";
+
             return {
               id: m.id || String(Math.random()),
               name: m.name || "Miembro",
               role: m.role || "Staff",
-              description: typeof m.description === "string" ? m.description : "",
+              description: memberDescription,
               avatarType: (m.avatar_type === "image" || m.avatar_image ? "image" : "monogram") as "monogram" | "image",
               avatarImage: typeof m.avatar_image === "string" ? m.avatar_image : "",
               gradient: m.gradient || "from-orange-500 to-rose-600",
