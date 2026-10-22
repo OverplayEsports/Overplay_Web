@@ -12,6 +12,8 @@ export interface Player {
   avatarImage?: string;
   socials: Partial<Record<SocialPlatform, string>>;
   gradient: string;
+  description?: string;
+  topHeroes?: string[];
 }
 
 export const ROSTER: Player[] = [
@@ -21,8 +23,10 @@ export const ROSTER: Player[] = [
     role: "Main Tank",
     position: "Capitán",
     events: ["Tourney 1", "Tourney 2", "Tourney 3", "Clash Cup"],
-    socials: { x: "#", twitch: "#" },
+    socials: { x: "https://x.com/OverplayEsports", twitch: "https://twitch.tv/OverplayEsports" },
     gradient: "from-orange-500 to-rose-600",
+    description: "Líder de la línea frontal y estratega del equipo. Especialista en control de espacio y tempo en peleas de mapa.",
+    topHeroes: ["Reinhardt", "Winston", "Sigma"],
   },
   {
     tag: "02",
@@ -30,8 +34,10 @@ export const ROSTER: Player[] = [
     role: "DPS Hitscan",
     position: "Titular",
     events: ["Tourney 2", "Tourney 3", "Clash Cup"],
-    socials: { x: "#", twitch: "#" },
+    socials: { x: "https://x.com/OverplayEsports", twitch: "https://twitch.tv/OverplayEsports" },
     gradient: "from-rose-500 to-red-600",
+    description: "Puntería de alta precisión a larga distancia. Encargado de los duelos de rango y primeros picks del mapa.",
+    topHeroes: ["Cassidy", "Ashe", "Widowmaker"],
   },
   {
     tag: "03",
@@ -39,8 +45,10 @@ export const ROSTER: Player[] = [
     role: "DPS Proyectil",
     position: "Titular",
     events: ["Tourney 3", "Clash Cup"],
-    socials: { x: "#", youtube: "#" },
+    socials: { x: "https://x.com/OverplayEsports", youtube: "https://youtube.com/@OverplayEsports" },
     gradient: "from-violet-500 to-fuchsia-600",
+    description: "Movilidad constante y presión en flancos. Especialista en composiciones agresivas de buceo y teamfights rápidas.",
+    topHeroes: ["Tracer", "Genji", "Echo"],
   },
   {
     tag: "04",
@@ -48,8 +56,10 @@ export const ROSTER: Player[] = [
     role: "Flex Tank",
     position: "Titular",
     events: ["Tourney 1", "Tourney 3", "Clash Cup"],
-    socials: { x: "#", twitch: "#" },
+    socials: { x: "https://x.com/OverplayEsports", twitch: "https://twitch.tv/OverplayEsports" },
     gradient: "from-amber-500 to-orange-600",
+    description: "Adaptabilidad extrema a composiciones enemigas. Domina off-tanks defensivos y agresivos con igual soltura.",
+    topHeroes: ["D.va", "Zarya", "Doomfist"],
   },
   {
     tag: "05",
@@ -57,8 +67,10 @@ export const ROSTER: Player[] = [
     role: "Main Support",
     position: "Titular",
     events: ["Tourney 2", "Tourney 3", "Clash Cup"],
-    socials: { x: "#", twitch: "#" },
+    socials: { x: "https://x.com/OverplayEsports", twitch: "https://twitch.tv/OverplayEsports" },
     gradient: "from-fuchsia-500 to-purple-600",
+    description: "Coordinación de rotaciones de equipo y curación sostenida en momentos de máxima presión durante torneos oficiales.",
+    topHeroes: ["Lucio", "Brigitte", "Mercy"],
   },
   {
     tag: "06",
@@ -66,8 +78,10 @@ export const ROSTER: Player[] = [
     role: "Flex Support",
     position: "Titular",
     events: ["Tourney 3", "Clash Cup"],
-    socials: { x: "#" },
+    socials: { x: "https://x.com/OverplayEsports" },
     gradient: "from-red-500 to-rose-600",
+    description: "Gran capacidad mecánica en disparos críticos de soporte y habilidades decisivas que cambian el rumbo de partidas.",
+    topHeroes: ["Ana", "Kiriko", "Baptiste"],
   },
   {
     tag: "07",
@@ -75,8 +89,10 @@ export const ROSTER: Player[] = [
     role: "DPS",
     position: "Suplente",
     events: ["Tourney 3"],
-    socials: { x: "#", twitch: "#" },
+    socials: { x: "https://x.com/OverplayEsports", twitch: "https://twitch.tv/OverplayEsports" },
     gradient: "from-orange-600 to-red-600",
+    description: "Impacto inmediato desde el banquillo, dominando selecciones flexibles para desconcertar al rival.",
+    topHeroes: ["Sojourn", "Pharah", "Soldado76"],
   },
   {
     tag: "08",
@@ -84,8 +100,10 @@ export const ROSTER: Player[] = [
     role: "Tank",
     position: "Suplente",
     events: ["Tourney 3", "Clash Cup"],
-    socials: { x: "#" },
+    socials: { x: "https://x.com/OverplayEsports" },
     gradient: "from-purple-500 to-violet-600",
+    description: "Poder de choque en puntos de captura y mapas de control. Especialista en disrupción caótica.",
+    topHeroes: ["Mauga", "JunkerQueen", "WreckingBall"],
   },
   {
     tag: "09",
@@ -93,8 +111,10 @@ export const ROSTER: Player[] = [
     role: "Head Coach",
     position: "Cuerpo técnico",
     events: ["Tourney 2", "Tourney 3", "Clash Cup"],
-    socials: { x: "#", youtube: "#" },
+    socials: { x: "https://x.com/OverplayEsports", youtube: "https://youtube.com/@OverplayEsports" },
     gradient: "from-rose-600 to-violet-600",
+    description: "Análisis de macro-juego, scouting de oponentes y preparación táctica integral para cada serie competitiva.",
+    topHeroes: ["Reinhardt", "Ana", "Lucio"],
   },
 ];
 
@@ -184,6 +204,10 @@ export async function fetchCompetitiveData(): Promise<{ roster: Player[]; events
               avatarImage: typeof p.avatarImage === "string" ? p.avatarImage : "",
               socials: Object.keys(socialsMap).length > 0 ? socialsMap : { x: "#" },
               gradient: p.gradient || "from-orange-500 to-rose-600",
+              description: typeof p.description === "string" ? p.description : "",
+              topHeroes: Array.isArray(p.topHeroes)
+                ? p.topHeroes
+                : (Array.isArray(p.heroes) ? p.heroes : []),
             };
           });
         }

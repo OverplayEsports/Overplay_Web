@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Flag, Medal, Shield } from "lucide-react";
+import { Flag, Medal, Shield, ChevronDown } from "lucide-react";
 import { ROSTER, TEAM_EVENTS, fetchCompetitiveData, type Player, type TeamEvent } from "../../data/roster";
 import { SectionHeading } from "../ui/SectionHeading";
 import { MonogramAvatar } from "../ui/MonogramAvatar";
@@ -9,105 +9,194 @@ import { cn } from "../../utils/cn";
 
 function PlayerCard({ player }: { player: Player }) {
   const [imgError, setImgError] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const isImageAvatar =
     !imgError &&
     player.avatarType === "image" &&
     typeof player.avatarImage === "string" &&
     player.avatarImage.trim().length > 0;
 
+  const topHeroes = Array.isArray(player.topHeroes) ? player.topHeroes : [];
+
+  const activeSocials = player.socials
+    ? (Object.entries(player.socials) as [keyof typeof player.socials, string][]).filter(
+        ([_, href]) => href && href.trim().length > 0 && href !== "#"
+      )
+    : [];
+
   return (
-    <article className="card-surface group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl p-5 sm:p-6 transition-all duration-500 will-change-transform hover:-translate-y-2 hover:border-orange-400/30 hover:shadow-[0_24px_60px_-24px_rgba(249,115,22,0.4)]">
+    <article
+      onClick={() => setIsExpanded(!isExpanded)}
+      className={cn(
+        "card-surface group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer select-none",
+        "hover:-translate-y-1 hover:border-orange-400/40 hover:shadow-[0_20px_50px_-20px_rgba(249,115,22,0.35)]",
+        isExpanded
+          ? "border-orange-500/60 shadow-[0_20px_50px_-20px_rgba(249,115,22,0.45)] ring-1 ring-orange-500/30"
+          : "border-white/10"
+      )}
+    >
+      {/* Barra superior animada */}
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-[2.5px] origin-left scale-x-0 bg-brand-gradient transition-transform duration-500 group-hover:scale-x-100 z-20"
+      />
+
       {/* Glow de fondo */}
       <span
         aria-hidden
-        className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-orange-500/10 blur-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-100"
-      />
-      {/* Barra inferior animada */}
-      <span
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 h-[3px] origin-left scale-x-0 bg-brand-gradient transition-transform duration-500 group-hover:scale-x-100"
+        className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-orange-500/10 blur-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-100 pointer-events-none"
       />
 
-      {/* Bloque Superior: Avatar a la izquierda, Textos a la derecha */}
-      <div className="relative flex items-start gap-4 sm:gap-5">
-        {/* Avatar */}
-        <div className="shrink-0 transition-transform duration-500 group-hover:scale-[1.05] group-hover:rotate-[-2deg]">
+      {/* 1. Bloque Horizontal Principal */}
+      <div className="relative min-h-[125px] sm:min-h-[135px] overflow-hidden">
+        {/* Fondo del lado izquierdo: Imagen usando el alto total y degradado hacia la derecha */}
+        <div className="absolute left-0 top-0 bottom-0 w-36 sm:w-44 overflow-hidden pointer-events-none">
           {isImageAvatar ? (
-            <div className="relative h-20 w-20 sm:h-24 sm:w-24 overflow-hidden rounded-2xl ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-orange-400/60 transition-all">
-              <img
-                src={player.avatarImage}
-                alt={player.name || "Jugador"}
-                onError={() => setImgError(true)}
-                className="h-full w-full rounded-2xl object-cover"
-                loading="lazy"
-              />
-            </div>
+            <img
+              src={player.avatarImage}
+              alt={player.name || "Jugador"}
+              onError={() => setImgError(true)}
+              className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
           ) : (
-            <MonogramAvatar name={player.name || "UL"} gradient={player.gradient || "from-orange-500 to-rose-600"} size="xl" />
+            <div
+              className={cn(
+                "h-full w-full flex items-center justify-center font-display font-black text-3xl sm:text-4xl text-white/90 bg-gradient-to-br",
+                player.gradient || "from-orange-500 to-rose-600"
+              )}
+            >
+              {player.name ? player.name.slice(0, 2).toUpperCase() : "UL"}
+            </div>
           )}
+          {/* Degradado hacia la derecha para fundirse con la casilla */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0b0b0e]/75 to-[#0b0b0e]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0e]/80 via-transparent to-black/20" />
         </div>
 
-        {/* Textos a la derecha */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <h4 className="font-display text-2xl sm:text-3xl font-bold uppercase italic tracking-wide text-white truncate">
-              {player.name || "Jugador"}
-            </h4>
-            <span
-              aria-hidden
-              className="select-none font-display text-3xl sm:text-4xl font-bold italic leading-none text-white/[0.12] transition-colors duration-500 group-hover:text-orange-500/30"
-            >
-              {player.tag || "00"}
-            </span>
+        {/* Textos y contenido a la derecha de la imagen */}
+        <div className="relative z-10 flex h-full flex-col justify-between pl-32 sm:pl-40 pr-3.5 sm:pr-4 py-3 sm:py-3.5">
+          <div>
+            {/* Nombre arriba y Tag */}
+            <div className="flex items-start justify-between gap-1.5">
+              <h4 className="font-display text-lg sm:text-xl font-bold uppercase italic tracking-wide text-white truncate drop-shadow-md">
+                {player.name || "Jugador"}
+              </h4>
+              <span className="font-display text-xs font-bold text-white/30 group-hover:text-orange-400 transition-colors shrink-0">
+                #{player.tag || "00"}
+              </span>
+            </div>
+
+            {/* Rol abajo del nombre */}
+            <p className="text-xs sm:text-[13px] font-semibold uppercase tracking-wider text-orange-400 font-display mt-0.5 truncate">
+              {player.role || "Player"}
+            </p>
           </div>
 
-          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs sm:text-sm">
-            <span className="font-bold text-orange-300">{player.role || "Player"}</span>
-            <span aria-hidden className="h-1 w-1 rounded-full bg-white/30" />
-            <span className="text-white/50">{player.position || "Titular"}</span>
-          </p>
+          {/* Abajo: Los 3 héroes más usados en una línea horizontal + Botón Ver detalles */}
+          <div className="mt-2.5 flex items-center justify-between gap-2">
+            {topHeroes.length > 0 ? (
+              <div className="flex items-center gap-1.5">
+                {topHeroes.slice(0, 3).map((hero, idx) => (
+                  <div
+                    key={idx}
+                    title={hero}
+                    className="group/hero relative h-7 w-7 sm:h-8 sm:w-8 shrink-0 overflow-hidden rounded-lg border border-white/20 bg-black/70 p-0.5 shadow-md ring-1 ring-white/10 transition-transform hover:scale-110"
+                  >
+                    <img
+                      src={`/images/Overwatch/${hero}.png`}
+                      alt={hero}
+                      className="h-full w-full rounded-md object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span className="text-[10px] text-white/30 italic">Sin héroes asignados</span>
+            )}
 
-          {/* Eventos disputados */}
-          {player.events && player.events.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {player.events.map((event) => (
-                <span
-                  key={event}
-                  className="rounded-md border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 font-display text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60 transition-colors duration-300 group-hover:border-white/15 group-hover:text-white/80"
-                >
-                  {event}
-                </span>
-              ))}
+            {/* Botón de despliegue interactivo */}
+            <div className="flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.04] px-2 py-1 text-[10px] font-semibold text-white/50 transition-colors group-hover:border-orange-400/40 group-hover:text-white">
+              <span>{isExpanded ? "Cerrar" : "Detalles"}</span>
+              <ChevronDown
+                className={cn(
+                  "h-3 w-3 transition-transform duration-300",
+                  isExpanded && "rotate-180"
+                )}
+              />
             </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Redes Sociales Abajo */}
-      <div className="relative mt-5 flex items-center justify-center gap-2 border-t border-white/[0.07] pt-3.5">
-        {player.socials &&
-          (Object.entries(player.socials) as [keyof typeof player.socials, string][]).map(
-            ([platform, href]) =>
-              href &&
-              href !== "#" && (
-                <SocialButton
-                  key={platform}
-                  platform={platform}
-                  href={href}
-                  label={`${player.name || "Jugador"} en ${platform}`}
-                  className="h-8 w-8 rounded-full border-white/10 bg-white/[0.04] text-white/60 hover:border-orange-400/50 hover:bg-orange-500/15 hover:text-white"
-                  iconClassName="h-3.5 w-3.5"
-                />
-              )
+      {/* 2. Despliegue interactivo (Redes Sociales, Tags y Descripción) */}
+      {isExpanded && (
+        <div
+          className="relative z-10 border-t border-white/10 bg-black/50 px-4 py-3.5 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Descripción / Biografía */}
+          {player.description ? (
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1">
+                Biografía & Trayectoria
+              </span>
+              <p className="text-xs text-white/70 leading-relaxed italic">
+                {player.description}
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-white/30 italic">Sin descripción añadida aún.</p>
           )}
-      </div>
 
-      {/* Abajo de las redes sociales: UL · OFICIAL */}
-      <div className="relative mt-2 flex items-center justify-center border-t border-white/[0.04] pt-2">
-        <span className="font-display text-[10px] font-bold uppercase tracking-[0.35em] text-white/35">
-          UL · OFICIAL
-        </span>
-      </div>
+          {/* Tags & Torneos */}
+          <div>
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-white/40 mb-1.5">
+              Tags & Torneos
+            </span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-md border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-300">
+                <Shield className="h-2.5 w-2.5" />
+                {player.position || "Titular"}
+              </span>
+              {player.events &&
+                player.events.map((ev) => (
+                  <span
+                    key={ev}
+                    className="rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 font-display text-[9px] font-semibold uppercase tracking-wider text-white/60"
+                  >
+                    {ev}
+                  </span>
+                ))}
+            </div>
+          </div>
+
+          {/* Redes Sociales */}
+          {activeSocials.length > 0 && (
+            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                Redes Sociales
+              </span>
+              <div className="flex items-center gap-1.5">
+                {activeSocials.map(([platform, href]) => (
+                  <SocialButton
+                    key={platform}
+                    platform={platform}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    label={`${player.name} en ${platform}`}
+                    className="h-6.5 w-6.5 rounded-full border-white/10 bg-white/[0.04] text-white/60 hover:border-orange-400/50 hover:bg-orange-500/15 hover:text-white"
+                    iconClassName="h-3 w-3"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </article>
   );
 }
