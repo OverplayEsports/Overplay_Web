@@ -49,15 +49,15 @@ function PlayerCard({ player }: { player: Player }) {
       />
 
       {/* 1. Bloque Horizontal Principal */}
-      <div className="relative min-h-[125px] sm:min-h-[135px] overflow-hidden">
-        {/* Fondo del lado izquierdo: Imagen usando el alto total y degradado hacia la derecha */}
-        <div className="absolute left-0 top-0 bottom-0 w-36 sm:w-44 overflow-hidden pointer-events-none">
+      <div className="relative flex min-h-[120px] sm:min-h-[130px] items-stretch overflow-hidden">
+        {/* Lado Izquierdo: Imagen usando el alto total de la casilla en proporción 1:1 */}
+        <div className="relative shrink-0 self-stretch aspect-square overflow-hidden bg-black/40">
           {isImageAvatar ? (
             <img
               src={player.avatarImage}
               alt={player.name || "Jugador"}
               onError={() => setImgError(true)}
-              className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+              className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
               loading="lazy"
             />
           ) : (
@@ -70,17 +70,17 @@ function PlayerCard({ player }: { player: Player }) {
               {player.name ? player.name.slice(0, 2).toUpperCase() : "UL"}
             </div>
           )}
-          {/* Degradado hacia la derecha para fundirse con la casilla */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0b0b0e]/75 to-[#0b0b0e]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0e]/80 via-transparent to-black/20" />
+          {/* Degradado suave en el borde derecho para fundirse elegantemente con la casilla */}
+          <div className="absolute inset-y-0 right-0 w-8 sm:w-12 bg-gradient-to-r from-transparent to-[#0b0b0e] pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0e]/30 via-transparent to-transparent pointer-events-none" />
         </div>
 
         {/* Textos y contenido a la derecha de la imagen */}
-        <div className="relative z-10 flex h-full flex-col justify-between pl-32 sm:pl-40 pr-3.5 sm:pr-4 py-3 sm:py-3.5">
+        <div className="relative z-10 flex flex-1 min-w-0 flex-col justify-between py-3 px-3.5 sm:px-4">
           <div>
             {/* Nombre arriba y Tag */}
             <div className="flex items-start justify-between gap-1.5">
-              <h4 className="font-display text-lg sm:text-xl font-bold uppercase italic tracking-wide text-white truncate drop-shadow-md">
+              <h4 className="font-display text-base sm:text-lg font-bold uppercase italic tracking-wide text-white truncate drop-shadow-md">
                 {player.name || "Jugador"}
               </h4>
               <span className="font-display text-xs font-bold text-white/30 group-hover:text-orange-400 transition-colors shrink-0">
