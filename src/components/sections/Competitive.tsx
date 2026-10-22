@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 import { Flag, Medal, Shield, ChevronDown } from "lucide-react";
-import { ROSTER, TEAM_EVENTS, fetchCompetitiveData, type Player, type TeamEvent } from "../../data/roster";
+import {
+  ROSTER,
+  TEAM_EVENTS,
+  fetchCompetitiveData,
+  getCachedCompetitiveData,
+  type Player,
+  type TeamEvent,
+} from "../../data/roster";
 import { SectionHeading } from "../ui/SectionHeading";
 import { MonogramAvatar } from "../ui/MonogramAvatar";
 import { SocialButton } from "../ui/SocialIcons";
 import { Reveal, Stagger, StaggerItem } from "../ui/Reveal";
+import { getHeroImageUrl, getLocalHeroImageUrl } from "../../utils/heroImages";
 import { cn } from "../../utils/cn";
 
 function PlayerCard({ player }: { player: Player }) {
@@ -20,8 +28,8 @@ function PlayerCard({ player }: { player: Player }) {
   const topHeroes = Array.isArray(player.topHeroes) ? player.topHeroes : [];
 
   const activeSocials = player.socials
-    ? (Object.entries(player.socials) as [keyof typeof player.socials, string][]).filter(
-        ([_, href]) => href && href.trim().length > 0 && href !== "#"
+    ? (Object.entries(player.socials) as [keyof typeof player.socials, any][]).filter(
+        ([_, href]) => typeof href === "string" && href.trim().length > 0 && href !== "#"
       )
     : [];
 
@@ -95,11 +103,18 @@ function PlayerCard({ player }: { player: Player }) {
                   <div
                     key={idx}
                     title={hero}
-                    className="group/hero relative h-9 w-9 sm:h-10 sm:w-10 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/70 p-0.5 shadow-md ring-1 ring-white/10 transition-transform hover:scale-110"
+                    className="group/hero relative h-10 w-10 sm:h-11 sm:w-11 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/70 p-0.5 shadow-md ring-1 ring-white/10 transition-transform hover:scale-110"
                   >
                     <img
-                      src={`/images/Overwatch/${hero}.png`}
+                      src={getHeroImageUrl(hero)}
                       alt={hero}
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.dataset.triedFallback) {
+                          target.dataset.triedFallback = "true";
+                          target.src = getLocalHeroImageUrl(hero);
+                        }
+                      }}
                       className="h-full w-full rounded-lg object-cover"
                       loading="lazy"
                     />
@@ -154,7 +169,7 @@ function PlayerCard({ player }: { player: Player }) {
                 <Shield className="h-2.5 w-2.5" />
                 {player.position || "Titular"}
               </span>
-              {player.events &&
+              {Array.isArray(player.events) &&
                 player.events.map((ev) => (
                   <span
                     key={ev}
@@ -219,8 +234,8 @@ const TIER_STYLES: Record<TeamEvent["tier"], { badge: string; border: string; ic
 
 /** III. COMPETITIVO — roster oficial de UL + historial de participación. */
 export function Competitive() {
-  const [roster, setRoster] = useState<Player[]>(ROSTER);
-  const [events, setEvents] = useState<TeamEvent[]>(TEAM_EVENTS);
+  const [roster, setRoster] = useState<Player[]>(() => getCachedCompetitiveData().roster);
+  const [events, setEvents] = useState<TeamEvent[]>(() => getCachedCompetitiveData().events);
 
   useEffect(() => {
     let alive = true;
@@ -239,6 +254,8 @@ export function Competitive() {
       alive = false;
     };
   }, []);
+
+  const rosterKey = roster.map((p) => p.id || p.tag || p.name).join("_");
 
   return (
     <section id="competitivo" aria-label="Competitivo" className="relative scroll-mt-24 pt-6 sm:pt-8 pb-24 sm:pb-32">
@@ -273,7 +290,7 @@ export function Competitive() {
         </div>
 
         {/* Roster 3 x 3 */}
-        <Stagger gap={0.08} className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger key={rosterKey} gap={0.08} className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {roster.map((player) => (
             <StaggerItem key={player.id || player.tag || player.name}>
               <PlayerCard player={player} />

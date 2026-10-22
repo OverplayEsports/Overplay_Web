@@ -13,6 +13,7 @@ import { AlliesPage } from "./pages/AlliesPage";
 
 import { TournamentRegistrationModal } from "./components/tournament/TournamentRegistrationModal";
 import { fetchTeamGroups } from "./data/team";
+import { fetchCompetitiveData } from "./data/roster";
 
 export type RouteId = "inicio" | "nosotros" | "eventos" | "reglas" | "competitivo" | "noticias" | "aliados" | "noticia-detalle";
 
@@ -54,8 +55,9 @@ export default function App() {
   });
 
   useEffect(() => {
-    // Precarga anticipada en segundo plano para que "Sobre Nosotros" esté lista al instante sin parpadeos
+    // Precarga anticipada en segundo plano para que "Sobre Nosotros" y "Competitivo" estén listos al instante sin parpadeos
     fetchTeamGroups().catch(() => {});
+    fetchCompetitiveData().catch(() => {});
 
     const handleHashChange = () => {
       const hash = window.location.hash.toLowerCase();

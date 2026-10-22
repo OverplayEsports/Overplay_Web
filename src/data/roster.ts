@@ -157,6 +157,28 @@ export const TEAM_EVENTS: TeamEvent[] = [
   },
 ];
 
+const COMPETITIVE_STORAGE_KEY = "overplay_competitive_data";
+let inMemoryCompetitiveData: { roster: Player[]; events: TeamEvent[] } | null = null;
+
+export function getCachedCompetitiveData(): { roster: Player[]; events: TeamEvent[] } {
+  if (inMemoryCompetitiveData) return inMemoryCompetitiveData;
+  if (typeof window !== "undefined" && window.localStorage) {
+    try {
+      const stored = localStorage.getItem(COMPETITIVE_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && Array.isArray(parsed.roster) && parsed.roster.length > 0) {
+          inMemoryCompetitiveData = parsed;
+          return parsed;
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return { roster: ROSTER, events: TEAM_EVENTS };
+}
+
 /**
  * Obtiene el roster competitivo y el historial de torneos desde Supabase.
  * Si falla o no existe, devuelve los datos locales como fallback.
@@ -185,7 +207,7 @@ export async function fetchCompetitiveData(): Promise<{ roster: Player[]; events
             if (p.socials && typeof p.socials === "object") {
               Object.entries(p.socials).forEach(([key, val]: [string, any]) => {
                 if (val && typeof val === "object") {
-                  if (val.enabled && val.url) {
+                  if (val.enabled && val.url && typeof val.url === "string") {
                     socialsMap[key as SocialPlatform] = val.url;
                   }
                 } else if (typeof val === "string" && val.trim()) {
@@ -216,12 +238,26 @@ export async function fetchCompetitiveData(): Promise<{ roster: Player[]; events
           ? parsed.events
           : TEAM_EVENTS;
 
-        return { roster, events };
+        const result = { roster, events };
+        inMemoryCompetitiveData = result;
+        if (typeof window !== "undefined" && window.localStorage) {
+          try {
+            localStorage.setItem(COMPETITIVE_STORAGE_KEY, JSON.stringify(result));
+          } catch {
+            // ignore
+          }
+        }
+        return result;
       }
     }
   } catch (err) {
     console.warn("[Overplay Competitive] Usando datos locales de competitivo (fallback):", err);
   }
 
-  return { roster: ROSTER, events: TEAM_EVENTS };
+  return getCachedCompetitiveData();
+}
+
+// Iniciar precarga inmediata al importar en el navegador
+if (typeof window !== "undefined") {
+  fetchCompetitiveData().catch(() => {});
 }

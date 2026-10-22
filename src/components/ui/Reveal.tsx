@@ -22,7 +22,7 @@ export function Reveal({ children, className, delay = 0, y = 24, once = true, bl
       className={className}
       initial={{ opacity: 0, y, scale: 0.985, filter: `blur(${blur}px)` }}
       whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      viewport={{ once, amount: 0.05 }}
+      viewport={{ once, amount: 0.01 }}
       transition={{ duration: 0.7, delay, ease: EASE }}
     >
       {children}
@@ -63,7 +63,8 @@ export function Stagger({ children, className, gap = 0.06, delay = 0 }: StaggerP
       variants={parentVariants(gap, delay)}
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, amount: 0.05 }}
+      animate="show"
+      viewport={{ once: true, amount: 0.01 }}
     >
       {children}
     </motion.div>
