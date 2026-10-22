@@ -3,7 +3,7 @@ import { cn } from "../../utils/cn";
 interface MonogramAvatarProps {
   name: string;
   gradient: string;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "fill";
   className?: string;
   rounded?: "xl" | "full";
 }
@@ -13,6 +13,7 @@ const SIZES: Record<NonNullable<MonogramAvatarProps["size"]>, string> = {
   md: "h-14 w-14 text-lg",
   lg: "h-20 w-20 text-2xl sm:h-24 sm:w-24 sm:text-3xl",
   xl: "h-24 w-24 text-3xl sm:h-28 sm:w-28 sm:text-4xl",
+  fill: "h-full w-full text-xl sm:text-2xl",
 };
 
 /**

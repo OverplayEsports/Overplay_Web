@@ -58,7 +58,7 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
   return (
     <article
       className={cn(
-        "card-surface group relative flex h-full flex-row items-stretch overflow-hidden rounded-2xl p-4 sm:p-5",
+        "card-surface group relative flex h-full min-h-[110px] sm:min-h-[120px] flex-row items-stretch overflow-hidden rounded-2xl p-3 sm:p-3.5",
         "transition-all duration-500 ease-out will-change-transform hover:-translate-y-1.5",
         styles.hover
       )}
@@ -77,32 +77,29 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
         className="absolute -top-16 left-1/4 h-32 w-32 -translate-x-1/2 rounded-full bg-white/[0.06] blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 pointer-events-none"
       />
 
-      {/* 1. Lado Izquierdo: Imagen / Avatar */}
-      <div className="shrink-0 flex items-start pt-0.5">
-        <div className="transition-transform duration-500 group-hover:scale-105">
-          {isImageAvatar ? (
-            <div className="relative h-14 w-14 sm:h-16 sm:w-16 overflow-hidden rounded-2xl ring-2 ring-white/20 p-0.5 bg-gradient-to-tr shadow-lg group-hover:ring-orange-400/60 transition-all">
-              <img
-                src={member.avatarImage}
-                alt={member.name || "Miembro"}
-                onError={() => setImgError(true)}
-                className="h-full w-full rounded-2xl object-cover"
-                loading="lazy"
-              />
-            </div>
-          ) : (
-            <MonogramAvatar
-              name={member.name || "OP"}
-              gradient={member.gradient || "from-orange-500 to-rose-600"}
-              size="md"
-              rounded="xl"
-            />
-          )}
-        </div>
+      {/* 1. Lado Izquierdo: Imagen / Avatar usando el alto proporcional de la casilla */}
+      <div className="relative shrink-0 self-stretch aspect-square min-w-[84px] sm:min-w-[96px] max-w-[124px] overflow-hidden rounded-xl sm:rounded-2xl ring-1 ring-white/15 bg-white/[0.02] shadow-md group-hover:ring-orange-400/50 transition-all duration-300">
+        {isImageAvatar ? (
+          <img
+            src={member.avatarImage}
+            alt={member.name || "Miembro"}
+            onError={() => setImgError(true)}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <MonogramAvatar
+            name={member.name || "OP"}
+            gradient={member.gradient || "from-orange-500 to-rose-600"}
+            size="fill"
+            rounded="xl"
+            className="!h-full !w-full !rounded-xl sm:!rounded-2xl !ring-0 text-xl sm:text-2xl"
+          />
+        )}
       </div>
 
-      {/* 2. Centro: Nombre, Rol y Descripción */}
-      <div className="flex-1 min-w-0 px-3.5 sm:px-4 flex flex-col justify-center text-left">
+      {/* 2. Centro: Nombre al costado derecho de la imagen, Rol y Descripción */}
+      <div className="flex-1 min-w-0 px-3 sm:px-3.5 flex flex-col justify-center text-left">
         <h4 className="font-display text-base sm:text-lg font-bold uppercase italic tracking-wide text-white truncate">
           {member.name || "Miembro"}
         </h4>
@@ -110,15 +107,15 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
           {member.role || "Staff"}
         </p>
         {member.description && (
-          <p className="mt-1.5 text-xs leading-relaxed text-white/55 line-clamp-2">
+          <p className="mt-1 text-xs leading-relaxed text-white/55 line-clamp-2">
             {member.description}
           </p>
         )}
       </div>
 
-      {/* 3. Lado Derecho: Redes sociales en columna vertical (solo las activas) */}
+      {/* 3. Lado Derecho: Redes sociales en columna vertical compacta (solo las activas) */}
       {activeSocials.length > 0 && (
-        <div className="shrink-0 flex flex-col items-center justify-center gap-1.5 pl-2.5 sm:pl-3 border-l border-white/[0.08]">
+        <div className="shrink-0 flex flex-col items-center justify-center gap-1 pl-2 sm:pl-2.5 border-l border-white/[0.08] my-auto">
           {activeSocials.map((platform) => {
             const href = member.socials?.[platform];
             if (!href) return null;
@@ -128,8 +125,8 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
                 platform={platform}
                 href={href}
                 label={`${member.name || "Miembro"} en ${platform}`}
-                className="h-7 w-7 shrink-0 rounded-full border-white/10 bg-white/[0.03] text-white/50 hover:border-orange-400/50 hover:bg-orange-500/10 hover:text-white"
-                iconClassName="h-3.5 w-3.5"
+                className="h-5.5 w-5.5 sm:h-6 sm:w-6 shrink-0 rounded-full border border-white/10 bg-white/[0.03] text-white/50 hover:border-orange-400/50 hover:bg-orange-500/10 hover:text-white transition-all"
+                iconClassName="h-2.5 w-2.5 sm:h-3 sm:w-3"
               />
             );
           })}
