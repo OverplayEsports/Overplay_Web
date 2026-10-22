@@ -64,10 +64,20 @@ interface SocialButtonProps {
   label?: string;
   className?: string;
   iconClassName?: string;
+  target?: string;
+  rel?: string;
 }
 
 /** Botón circular de red social con hover de marca. */
-export function SocialButton({ platform, href, label, className, iconClassName }: SocialButtonProps) {
+export function SocialButton({
+  platform,
+  href,
+  label,
+  className,
+  iconClassName,
+  target = "_blank",
+  rel = "noopener noreferrer",
+}: SocialButtonProps) {
   const Icon = SOCIAL_ICONS[platform];
   if (!Icon) return null;
 
@@ -80,7 +90,14 @@ export function SocialButton({ platform, href, label, className, iconClassName }
   };
   return (
     <a
-      href={href}
+      href={href || "#"}
+      target={target}
+      rel={rel}
+      onClick={(e) => {
+        if (!href || href === "#") {
+          e.preventDefault();
+        }
+      }}
       aria-label={label ?? `Perfil en ${names[platform] || platform}`}
       className={cn(
         "group/soc flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/60",

@@ -124,6 +124,8 @@ function MemberCard({ member, accent }: { member: TeamGroup["members"][number]; 
                 key={platform}
                 platform={platform}
                 href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 label={`${member.name || "Miembro"} en ${platform}`}
                 className="h-5.5 w-5.5 sm:h-6 sm:w-6 shrink-0 rounded-full border border-white/10 bg-white/[0.03] text-white/50 hover:border-orange-400/50 hover:bg-orange-500/10 hover:text-white transition-all"
                 iconClassName="h-2.5 w-2.5 sm:h-3 sm:w-3"
