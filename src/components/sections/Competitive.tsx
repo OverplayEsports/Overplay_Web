@@ -103,7 +103,7 @@ function PlayerCard({ player }: { player: Player }) {
                   <div
                     key={idx}
                     title={hero}
-                    className="group/hero relative h-10 w-10 sm:h-11 sm:w-11 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/70 p-0.5 shadow-md ring-1 ring-white/10 transition-transform hover:scale-110"
+                    className="group/hero relative h-10 w-10 sm:h-11 sm:w-11 shrink-0 overflow-hidden rounded-xl border border-white/20 bg-black/70 p-0.5 shadow-md ring-1 ring-white/10"
                   >
                     <img
                       src={getHeroImageUrl(hero)}
