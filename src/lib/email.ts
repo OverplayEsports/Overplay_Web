@@ -15,7 +15,7 @@ const EMAILJS_PUBLIC_KEY =
 export const STAFF_NOTIFICATION_EMAIL = "overplaypage@gmail.com";
 
 const LOGO_URL =
-  "https://pub-def6d9ceb4ef4e8f84ee8a391d2b0b27.r2.dev/branding/Logo_Overplay.png";
+  "https://pub-def6d9ceb4ef4e8f84ee8a391d2b0b27.r2.dev/branding/Logo_Overplay_2.png";
 
 function getRankImgUrl(rankName: string): string {
   const found = OVERWATCH_RANKS.find((r) => r.id === rankName);
